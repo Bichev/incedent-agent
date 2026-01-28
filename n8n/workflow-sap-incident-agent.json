@@ -325,19 +325,33 @@
     },
     {
       "parameters": {
-        "space": "SAPKB",
-        "title": "={{ $json.incident_id }} - {{ $json.error_code }} Resolution",
-        "content": "<h2>Incident Details</h2><ul><li><strong>ID:</strong> {{ $json.incident_id }}</li><li><strong>Title:</strong> {{ $json.title }}</li><li><strong>Error Code:</strong> {{ $json.error_code }}</li><li><strong>Component:</strong> {{ $json.component }}</li><li><strong>Severity:</strong> {{ $json.severity }}</li></ul><h2>Problem Description</h2><p>{{ $json.description }}</p><h2>Resolution Steps</h2><ol>{{ $json.resolution_steps.map(s => '<li>' + s + '</li>').join('') }}</ol><h2>AI Analysis</h2><p><strong>Confidence:</strong> {{ $json.confidence_score }}%</p><p><strong>Reasoning:</strong> {{ $json.reasoning }}</p><p><strong>Estimated Time:</strong> {{ $json.estimated_time }}</p><h2>Related</h2><p><a href=\"https://YOUR_DOMAIN.atlassian.net/browse/{{ $json.jira_key }}\">Jira Ticket: {{ $json.jira_key }}</a></p>"
+        "method": "POST",
+        "url": "https://YOUR_DOMAIN.atlassian.net/wiki/api/v2/pages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ spaceId: 'YOUR_SPACE_ID', status: 'current', title: $json.incident_id + ' - ' + $json.error_code + ' Resolution', body: { representation: 'storage', value: '<h2>Incident Details</h2><ul><li><strong>ID:</strong> ' + $json.incident_id + '</li><li><strong>Title:</strong> ' + $json.title + '</li><li><strong>Error Code:</strong> ' + $json.error_code + '</li><li><strong>Component:</strong> ' + $json.component + '</li><li><strong>Severity:</strong> ' + $json.severity + '</li></ul><h2>Problem Description</h2><p>' + $json.description + '</p><h2>Resolution Steps</h2><ol>' + ($json.resolution_steps || []).map(s => '<li>' + s + '</li>').join('') + '</ol><h2>AI Analysis</h2><p><strong>Confidence:</strong> ' + $json.confidence_score + '%</p><p><strong>Reasoning:</strong> ' + $json.reasoning + '</p><p><strong>Estimated Time:</strong> ' + $json.estimated_time + '</p>' } }) }}",
+        "options": {}
       },
       "id": "confluence-create",
       "name": "Confluence - Create KB Article",
-      "type": "n8n-nodes-base.confluence",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
       "position": [2260, 180],
       "credentials": {
-        "confluenceCloudApi": {
-          "id": "CONFLUENCE_CREDENTIAL_ID",
-          "name": "Confluence Cloud"
+        "httpBasicAuth": {
+          "id": "ATLASSIAN_CREDENTIAL_ID",
+          "name": "Atlassian API"
         }
       }
     },
@@ -420,7 +434,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({ success: true, jira_key: $('Jira - Create Issue').first().json.key, confidence: $('Parse Decision').first().json.confidence_score, action: $('Parse Decision').first().json.recommended_action, message: $('Parse Decision').first().json.reasoning }) }}"
+        "responseBody": "={{ JSON.stringify({ success: true, jiraTicket: $('Jira - Create Issue').first().json.key, confidenceScore: $('Parse Decision').first().json.confidence_score, resolutionPath: $('Parse Decision').first().json.recommended_action, message: $('Parse Decision').first().json.reasoning, confluencePage: $('Confluence - Create KB Article').first()?.json?._links?.webui || null }) }}"
       },
       "id": "respond",
       "name": "Respond to Webhook",

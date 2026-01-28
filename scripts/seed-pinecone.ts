@@ -10,6 +10,10 @@
  *   PINECONE_INDEX_HOST - Your Pinecone index host URL
  */
 
+// Load environment variables from .env file
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || 'YOUR_OPENAI_API_KEY';
 const PINECONE_API_KEY = process.env.PINECONE_API_KEY || 'YOUR_PINECONE_API_KEY';
 const PINECONE_INDEX_HOST = process.env.PINECONE_INDEX_HOST || 'YOUR_INDEX_HOST';
@@ -100,6 +104,7 @@ async function createEmbedding(text: string): Promise<number[]> {
     body: JSON.stringify({
       model: 'text-embedding-3-small',
       input: text,
+      // Using default 1536 dimensions to match Pinecone index
     }),
   });
 
@@ -112,7 +117,9 @@ async function createEmbedding(text: string): Promise<number[]> {
 }
 
 async function upsertToPinecone(vectors: { id: string; values: number[]; metadata: Record<string, string> }[]) {
-  const response = await fetch(`https://${PINECONE_INDEX_HOST}/vectors/upsert`, {
+  // Handle both formats: with or without https://
+  const host = PINECONE_INDEX_HOST.replace(/^https?:\/\//, '');
+  const response = await fetch(`https://${host}/vectors/upsert`, {
     method: 'POST',
     headers: {
       'Api-Key': PINECONE_API_KEY,
