@@ -154,7 +154,7 @@ export default function Home() {
             <ResultsPanel
               results={results}
               scenario={selectedScenario}
-              isComplete={currentStepIndex >= steps.length}
+              isComplete={results !== null}
             />
           </div>
         </div>
