@@ -47,7 +47,7 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="fixed inset-0 m-auto
-                       w-[calc(100%-2rem)] max-w-4xl h-fit max-h-[85vh]
+                       w-[calc(100%-2rem)] max-w-4xl h-[85vh] min-h-[500px]
                        bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 
                        rounded-2xl shadow-2xl z-[60] overflow-hidden flex flex-col"
           >
