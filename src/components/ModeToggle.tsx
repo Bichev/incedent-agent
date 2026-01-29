@@ -15,25 +15,25 @@ export function ModeToggle({ mode, onModeChange, disabled }: ModeToggleProps) {
   const liveAvailable = isLiveModeAvailable()
 
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-sm text-gray-400">Mode:</span>
+    <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+      <span className="text-sm text-gray-400 hidden sm:inline">Mode:</span>
       <div className="flex items-center bg-slate-800/50 rounded-lg p-1">
         <button
           onClick={() => onModeChange('simulation')}
           disabled={disabled}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all ${
             mode === 'simulation'
               ? 'bg-slate-700 text-white'
               : 'text-gray-400 hover:text-gray-300'
           } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           <PlayCircle className="w-4 h-4" />
-          Simulation
+          <span className="hidden xs:inline">Simulation</span>
         </button>
         <button
           onClick={() => liveAvailable && onModeChange('live')}
           disabled={disabled || !liveAvailable}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all ${
             mode === 'live'
               ? 'bg-green-600/20 text-green-400'
               : 'text-gray-400 hover:text-gray-300'
@@ -45,14 +45,14 @@ export function ModeToggle({ mode, onModeChange, disabled }: ModeToggleProps) {
           ) : (
             <WifiOff className="w-4 h-4" />
           )}
-          Live
+          <span className="hidden xs:inline">Live</span>
         </button>
       </div>
       {mode === 'live' && liveAvailable && (
         <motion.span
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
-          className="flex items-center gap-1.5 text-xs text-green-400"
+          className="hidden sm:flex items-center gap-1.5 text-xs text-green-400"
         >
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>

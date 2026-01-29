@@ -80,24 +80,24 @@ export default function Home() {
           </div>
           
           {/* Controls Row */}
-          <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto overflow-x-auto">
             <AboutButton onClick={() => setIsAboutOpen(true)} />
             <ModeToggle mode={mode} onModeChange={setMode} disabled={isRunning} />
             
-            <div className="flex items-center gap-2 ml-auto sm:ml-0">
+            <div className="flex items-center gap-2 ml-auto sm:ml-0 flex-shrink-0">
               <motion.button
                 onClick={handleReset}
                 disabled={!selectedScenario || isRunning}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`p-2.5 rounded-lg transition-all ${
+                className={`p-2 sm:p-2.5 rounded-lg transition-all ${
                   !selectedScenario || isRunning
                     ? 'bg-gray-800/50 text-gray-600 cursor-not-allowed'
                     : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
                 }`}
                 title="Reset"
               >
-                <RotateCcw className="w-5 h-5" />
+                <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
               </motion.button>
               
               <motion.button
@@ -105,7 +105,7 @@ export default function Home() {
                 disabled={!selectedScenario || isRunning}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`flex items-center gap-2 py-2.5 px-5 rounded-lg font-semibold transition-all ${
+                className={`flex items-center gap-1.5 sm:gap-2 py-2 px-3 sm:py-2.5 sm:px-5 rounded-lg font-semibold transition-all text-sm sm:text-base ${
                   !selectedScenario || isRunning
                     ? 'bg-gray-800/50 text-gray-600 cursor-not-allowed'
                     : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white shadow-lg shadow-blue-500/25'
@@ -117,12 +117,13 @@ export default function Home() {
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
                     </span>
-                    Running...
+                    <span className="hidden xs:inline">Running...</span>
                   </>
                 ) : (
                   <>
                     <Play className="w-4 h-4" />
-                    Start Demo
+                    <span>Start</span>
+                    <span className="hidden sm:inline">Demo</span>
                   </>
                 )}
               </motion.button>
