@@ -6,11 +6,12 @@ import type {
   WorkflowStep, 
   ExecutionMetrics, 
   IntegrationResults,
-  DemoMode 
+  DemoMode,
+  Incident
 } from '@/types'
 import { createInitialSteps } from '@/lib/workflow-steps'
 import { simulateStep, generateIntegrationResults } from '@/lib/simulation-engine'
-import { triggerN8nWorkflow } from '@/lib/n8n-client'
+import { triggerN8nWorkflow, generateIncident } from '@/lib/n8n-client'
 
 interface UseWorkflowExecutionReturn {
   steps: WorkflowStep[]
@@ -18,6 +19,7 @@ interface UseWorkflowExecutionReturn {
   isRunning: boolean
   results: IntegrationResults | null
   metrics: ExecutionMetrics
+  generatedIncident: Incident | null
   startExecution: () => void
   resetExecution: () => void
 }
@@ -43,9 +45,11 @@ export function useWorkflowExecution(
   const [isRunning, setIsRunning] = useState(false)
   const [results, setResults] = useState<IntegrationResults | null>(null)
   const [metrics, setMetrics] = useState<ExecutionMetrics>(initialMetrics)
+  const [generatedIncident, setGeneratedIncident] = useState<Incident | null>(null)
   
   const executionRef = useRef<{ cancelled: boolean }>({ cancelled: false })
   const slaIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const generatedIncidentRef = useRef<Incident | null>(null)
 
   // SLA timer effect
   useEffect(() => {
@@ -76,6 +80,7 @@ export function useWorkflowExecution(
 
   const resetExecution = useCallback(() => {
     executionRef.current.cancelled = true
+    generatedIncidentRef.current = null
     if (slaIntervalRef.current) {
       clearInterval(slaIntervalRef.current)
     }
@@ -84,6 +89,7 @@ export function useWorkflowExecution(
     setIsRunning(false)
     setResults(null)
     setMetrics(initialMetrics)
+    setGeneratedIncident(null)
   }, [])
 
   const startExecution = useCallback(async () => {
@@ -122,6 +128,12 @@ export function useWorkflowExecution(
           
           if (executionRef.current.cancelled) break
           
+          // Set generated incident on the generate step (use scenario incident in simulation)
+          if (updatedSteps[i].id === 'generate') {
+            setGeneratedIncident(scenario.incident)
+            generatedIncidentRef.current = scenario.incident
+          }
+          
           // Update step with result
           setSteps(prev => prev.map((step, idx) => 
             idx === i ? { 
@@ -142,9 +154,27 @@ export function useWorkflowExecution(
           }
         } else {
           // Live mode - trigger actual n8n workflow
-          if (i === 0) {
+          const stepId = updatedSteps[i].id
+          
+          // Step 0: Generate unique incident via OpenAI
+          if (stepId === 'generate') {
+            try {
+              const result = await generateIncident(scenario.expectedPath, scenario.incident)
+              generatedIncidentRef.current = result.incident
+              setGeneratedIncident(result.incident)
+              console.log('Generated incident:', result.incident)
+            } catch (error) {
+              console.error('Failed to generate incident, using default:', error)
+              generatedIncidentRef.current = scenario.incident
+              setGeneratedIncident(scenario.incident)
+            }
+          }
+          
+          // Step 1: Trigger n8n workflow with generated incident
+          if (stepId === 'trigger') {
+            const incidentToSend = generatedIncidentRef.current || scenario.incident
             // Fire off n8n workflow without blocking UI progression
-            triggerN8nWorkflow(scenario)
+            triggerN8nWorkflow(scenario, incidentToSend)
               .then(response => {
                 console.log('n8n workflow completed:', response)
                 if (response.success && response.data) {
@@ -161,8 +191,13 @@ export function useWorkflowExecution(
           }
           
           // Simulate the visual steps with appropriate delays
-          const stepDelay = i === 2 || i === 4 ? 1500 : 800 // Longer for AI steps
-          await new Promise(resolve => setTimeout(resolve, stepDelay))
+          const stepDelay = stepId === 'generate' ? 2000 : 
+                           stepId === 'ai-assessment' || stepId === 'decision' ? 1500 : 800
+          
+          // For generate step, we already awaited the API call
+          if (stepId !== 'generate') {
+            await new Promise(resolve => setTimeout(resolve, stepDelay))
+          }
           
           if (executionRef.current.cancelled) break
           
@@ -175,7 +210,7 @@ export function useWorkflowExecution(
           ))
 
           // Update metrics on decision step
-          if (updatedSteps[i].id === 'decision') {
+          if (stepId === 'decision') {
             setMetrics(prev => ({
               ...prev,
               confidenceScore: prev.confidenceScore || scenario.expectedConfidence,
@@ -218,6 +253,7 @@ export function useWorkflowExecution(
     isRunning,
     results,
     metrics,
+    generatedIncident,
     startExecution,
     resetExecution,
   }

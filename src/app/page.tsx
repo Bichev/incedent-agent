@@ -24,6 +24,7 @@ export default function Home() {
     isRunning,
     results,
     metrics,
+    generatedIncident,
     startExecution,
     resetExecution,
   } = useWorkflowExecution(selectedScenario, mode)
@@ -146,6 +147,7 @@ export default function Home() {
               currentStepIndex={currentStepIndex}
               isRunning={isRunning}
               scenario={selectedScenario}
+              generatedIncident={generatedIncident}
             />
           </div>
 

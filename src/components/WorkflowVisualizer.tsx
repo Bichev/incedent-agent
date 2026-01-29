@@ -3,13 +3,14 @@
 import { motion } from 'framer-motion'
 import { Activity, CheckCircle2, AlertTriangle, XCircle, ArrowRight } from 'lucide-react'
 import { StepCard } from './StepCard'
-import type { WorkflowStep, Scenario } from '@/types'
+import type { WorkflowStep, Scenario, Incident } from '@/types'
 
 interface WorkflowVisualizerProps {
   steps: WorkflowStep[]
   currentStepIndex: number
   isRunning: boolean
   scenario: Scenario | null
+  generatedIncident?: Incident | null
 }
 
 const severityConfig = {
@@ -24,9 +25,13 @@ export function WorkflowVisualizer({
   currentStepIndex,
   isRunning,
   scenario,
+  generatedIncident,
 }: WorkflowVisualizerProps) {
   const isComplete = currentStepIndex >= steps.length
   const completedSteps = steps.filter(s => s.status === 'completed').length
+  
+  // Use generated incident if available, otherwise use scenario incident
+  const displayIncident = generatedIncident || scenario?.incident
 
   return (
     <div className="glass-card p-5 h-full flex flex-col">
@@ -95,20 +100,24 @@ export function WorkflowVisualizer({
                 'bg-gradient-to-br from-red-500/30 to-rose-600/20'
               }`}>
                 {(() => {
-                  const config = severityConfig[scenario.incident.severity]
+                  const config = severityConfig[displayIncident?.severity || scenario.incident.severity]
                   const Icon = config.icon
                   return <Icon className={`w-5 h-5 ${config.text}`} />
                 })()}
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-white text-sm leading-tight">{scenario.incident.title}</h3>
-                <p className="text-xs text-gray-500 mt-0.5 font-mono">{scenario.incident.id}</p>
+                <h3 className="font-medium text-white text-sm leading-tight">
+                  {displayIncident?.title || scenario.incident.title}
+                </h3>
+                <p className="text-xs text-gray-500 mt-0.5 font-mono">
+                  {displayIncident?.id || scenario.incident.id}
+                </p>
                 <div className="flex items-center gap-2 mt-2 flex-wrap">
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${severityConfig[scenario.incident.severity].bg} ${severityConfig[scenario.incident.severity].text}`}>
-                    {scenario.incident.severity}
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${severityConfig[displayIncident?.severity || scenario.incident.severity].bg} ${severityConfig[displayIncident?.severity || scenario.incident.severity].text}`}>
+                    {displayIncident?.severity || scenario.incident.severity}
                   </span>
                   <span className="text-xs text-gray-500 font-mono bg-gray-800/50 px-2 py-0.5 rounded">
-                    {scenario.incident.error_code}
+                    {displayIncident?.error_code || scenario.incident.error_code}
                   </span>
                 </div>
               </div>

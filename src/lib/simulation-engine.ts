@@ -5,7 +5,8 @@ import type {
   IntegrationResults,
   SimilarIncident,
   AIAssessment,
-  DecisionResult 
+  DecisionResult,
+  Incident
 } from '@/types'
 import { getRandomDuration } from './workflow-steps'
 
@@ -62,18 +63,30 @@ const similarIncidentsMap: Record<string, SimilarIncident[]> = {
 }
 
 // Generate step result based on step and scenario
-export function generateStepResult(stepId: string, scenario: Scenario): StepResult {
+export function generateStepResult(stepId: string, scenario: Scenario, generatedIncident?: Incident): StepResult {
   const timestamp = new Date().toISOString()
+  const incident = generatedIncident || scenario.incident
   
   switch (stepId) {
+    case 'generate':
+      return {
+        success: true,
+        message: `Generated unique incident: ${incident.id}`,
+        data: {
+          incidentId: incident.id,
+          title: incident.title,
+          error_code: incident.error_code,
+        },
+      }
+    
     case 'trigger':
       return {
         success: true,
-        message: `Incident ${scenario.incident.id} received`,
+        message: `Incident ${incident.id} sent to workflow`,
         data: {
-          incidentId: scenario.incident.id,
-          title: scenario.incident.title,
-          severity: scenario.incident.severity,
+          incidentId: incident.id,
+          title: incident.title,
+          severity: incident.severity,
           timestamp,
         },
       }
