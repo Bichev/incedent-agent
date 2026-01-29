@@ -365,30 +365,23 @@ CMD ["npm", "start"]
 
 ---
 
-## About JAX AI Agency
+## About the Author
 
-**JAX AI Agency** specializes in building enterprise-grade AI solutions that transform business operations. We combine cutting-edge AI technology with deep domain expertise to deliver measurable ROI.
-
-### Our Services
-- **AI Agent Development** - Custom autonomous agents for any domain
-- **Workflow Automation** - End-to-end process automation with n8n
-- **LLM Integration** - OpenAI, Anthropic, and open-source model implementation
-- **Vector Search Solutions** - Semantic search and RAG architectures
+Built by **Vladimir Bichev** - AI Solutions Architect specializing in enterprise-grade AI solutions that transform business operations.
 
 ### Contact
 
-- **Website**: [jaxaiagency.com](https://jaxaiagency.com)
-- **Email**: [contact@jaxaiagency.com](mailto:contact@jaxaiagency.com)
-- **LinkedIn**: [Vladimir Bichev](https://linkedin.com/in/vladimirbichev)
+- **Website**: [vladbichev.com](https://vladbichev.com)
+- **LinkedIn**: [Vladimir Bichev](https://www.linkedin.com/in/bichev/)
 
 ---
 
 <div align="center">
 
-**Built with passion by [JAX AI Agency](https://jaxaiagency.com)**
+**Built with passion by [Vlad Bichev](https://vladbichev.com)**
 
 [![GitHub](https://img.shields.io/badge/GitHub-Bichev-black?style=flat-square&logo=github)](https://github.com/Bichev)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Vladimir%20Bichev-blue?style=flat-square&logo=linkedin)](https://linkedin.com/in/vladimirbichev)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Vladimir%20Bichev-blue?style=flat-square&logo=linkedin)](https://www.linkedin.com/in/bichev/)
 
 MIT License - See [LICENSE](LICENSE) for details.
 

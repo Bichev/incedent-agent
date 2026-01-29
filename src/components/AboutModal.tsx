@@ -46,10 +46,10 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
-                       w-[calc(100%-2rem)] max-w-4xl h-[calc(100%-2rem)] max-h-[85vh]
+            className="fixed inset-0 m-auto
+                       w-[calc(100%-2rem)] max-w-4xl h-fit max-h-[85vh]
                        bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 
-                       rounded-2xl shadow-2xl z-50 overflow-hidden flex flex-col"
+                       rounded-2xl shadow-2xl z-[60] overflow-hidden flex flex-col"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 md:p-6 border-b border-slate-700/50 flex-shrink-0">
@@ -235,13 +235,15 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div className="text-center sm:text-left">
                   <p className="text-xs md:text-sm text-gray-400">
-                    Built by <span className="text-white font-medium">JAX AI Agency</span>
+                    Built by <a href="https://vladbichev.com" target="_blank" rel="noopener noreferrer" className="text-white font-medium hover:text-blue-400 transition-colors">Vlad Bichev</a>
                   </p>
                   <a 
-                    href="mailto:contact@jaxaiagency.com" 
+                    href="https://www.linkedin.com/in/bichev/" 
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-xs text-blue-400 hover:text-blue-300"
                   >
-                    contact@jaxaiagency.com
+                    linkedin.com/in/bichev
                   </a>
                 </div>
                 <div className="flex gap-2 md:gap-3">

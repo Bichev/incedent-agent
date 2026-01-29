@@ -292,7 +292,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://jaxaiagency.atlassian.net/wiki/api/v2/pages",
+        "url": "https://yourcompany.atlassian.net/wiki/api/v2/pages",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpBasicAuth",
         "sendHeaders": true,
@@ -334,7 +334,7 @@
           "mode": "list",
           "cachedResultName": "incident-alerts"
         },
-        "text": "={{ $('Parse Decision').first().json.recommended_action === 'auto_resolve' ? '✅ *Auto-Resolved*' : $('Parse Decision').first().json.recommended_action === 'assisted' ? '🟡 *Assisted*' : '🔴 *Escalated*' }}: {{ $('Parse Decision').first().json.incident_id }}\n\n*Incident:* {{ $('Parse Decision').first().json.title }}\n*Confidence:* {{ $('Parse Decision').first().json.confidence_score }}%\n*Error:* `{{ $('Parse Decision').first().json.error_code }}`\n*Component:* {{ $('Parse Decision').first().json.component }}\n\n<https://jaxaiagency.atlassian.net/browse/{{ $('Parse Decision').first().json.jira_key }}|View Jira Ticket>",
+        "text": "={{ $('Parse Decision').first().json.recommended_action === 'auto_resolve' ? '✅ *Auto-Resolved*' : $('Parse Decision').first().json.recommended_action === 'assisted' ? '🟡 *Assisted*' : '🔴 *Escalated*' }}: {{ $('Parse Decision').first().json.incident_id }}\n\n*Incident:* {{ $('Parse Decision').first().json.title }}\n*Confidence:* {{ $('Parse Decision').first().json.confidence_score }}%\n*Error:* `{{ $('Parse Decision').first().json.error_code }}`\n*Component:* {{ $('Parse Decision').first().json.component }}\n\n<https://yourcompany.atlassian.net/browse/{{ $('Parse Decision').first().json.jira_key }}|View Jira Ticket>",
         "otherOptions": {}
       },
       "id": "9c2fdb3d-335c-4ed0-8f57-6dc3fbcbbf8a",
@@ -355,10 +355,10 @@
     },
     {
       "parameters": {
-        "fromEmail": "support@jaxaiagency.com",
-        "toEmail": "=admin@jaxaiagency.com",
+        "fromEmail": "support@yourcompany.com",
+        "toEmail": "={{ $('Parse Decision').first().json.user_email }}",
         "subject": "Incident {{ $('Parse Decision').first().json.incident_id }} - {{ $('Parse Decision').first().json.recommended_action === 'auto_resolve' ? 'Resolved' : $('Parse Decision').first().json.recommended_action === 'assisted' ? 'Under Investigation' : 'Escalated' }}",
-        "html": "=<h2>Your incident has been {{ $('Parse Decision').first().json.recommended_action === 'auto_resolve' ? 'resolved' : $('Parse Decision').first().json.recommended_action === 'assisted' ? 'assigned for investigation' : 'escalated to our expert team' }}</h2>\n\n<p><strong>Incident ID:</strong> {{ $('Parse Decision').first().json.incident_id }}</p>\n<p><strong>Title:</strong> {{ $('Parse Decision').first().json.title }}</p>\n<p><strong>Error Code:</strong> {{ $('Parse Decision').first().json.error_code }}</p>\n<p><strong>Component:</strong> {{ $('Parse Decision').first().json.component }}</p>\n<p><strong>Confidence:</strong> {{ $('Parse Decision').first().json.confidence_score }}%</p>\n\n{{ $('Parse Decision').first().json.recommended_action === 'auto_resolve' ? '<h3>Resolution Steps:</h3><ol>' + ($('Parse Decision').first().json.resolution_steps || []).map(s => '<li>' + s + '</li>').join('') + '</ol>' : '' }}\n\n<p><a href=\"https://jaxaiagency.atlassian.net/browse/{{ $('Parse Decision').first().json.jira_key }}\">View Jira Ticket</a></p>\n\n<p>Best regards,<br>JAX AI Agency Support Team</p>",
+        "html": "=<h2>Your incident has been {{ $('Parse Decision').first().json.recommended_action === 'auto_resolve' ? 'resolved' : $('Parse Decision').first().json.recommended_action === 'assisted' ? 'assigned for investigation' : 'escalated to our expert team' }}</h2>\n\n<p><strong>Incident ID:</strong> {{ $('Parse Decision').first().json.incident_id }}</p>\n<p><strong>Title:</strong> {{ $('Parse Decision').first().json.title }}</p>\n<p><strong>Error Code:</strong> {{ $('Parse Decision').first().json.error_code }}</p>\n<p><strong>Component:</strong> {{ $('Parse Decision').first().json.component }}</p>\n<p><strong>Confidence:</strong> {{ $('Parse Decision').first().json.confidence_score }}%</p>\n\n{{ $('Parse Decision').first().json.recommended_action === 'auto_resolve' ? '<h3>Resolution Steps:</h3><ol>' + ($('Parse Decision').first().json.resolution_steps || []).map(s => '<li>' + s + '</li>').join('') + '</ol>' : '' }}\n\n<p><a href=\"https://yourcompany.atlassian.net/browse/{{ $('Parse Decision').first().json.jira_key }}\">View Jira Ticket</a></p>\n\n<p>Best regards,<br>AI Incident Agent</p>",
         "options": {}
       },
       "id": "b7a5aaad-d6b2-472b-bd99-56df98e233f2",

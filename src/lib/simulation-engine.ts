@@ -229,9 +229,7 @@ export function generateIntegrationResults(
 ): IntegrationResults {
   // Use actual n8n data if available, otherwise generate mock data
   const ticketId = n8nData?.jiraTicket || `SAP-${Math.floor(Math.random() * 1000) + 100}`
-  const jiraBaseUrl = n8nData?.jiraTicket 
-    ? 'https://jaxaiagency.atlassian.net/browse' 
-    : 'https://jira.atlassian.net/browse'
+  const jiraBaseUrl = 'https://jira.atlassian.net/browse'
   
   const resolutionPath = n8nData?.resolutionPath || scenario.expectedPath
   

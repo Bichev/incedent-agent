@@ -12,7 +12,7 @@ const links = [
   {
     icon: Linkedin,
     label: 'LinkedIn',
-    href: 'https://linkedin.com/in/vladbichev',
+    href: 'https://www.linkedin.com/in/bichev/',
   },
   {
     icon: Github,
