@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Play, RotateCcw, Zap } from 'lucide-react'
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground'
@@ -10,6 +10,7 @@ import { SLADashboard } from '@/components/SLADashboard'
 import { ResultsPanel } from '@/components/ResultsPanel'
 import { ModeToggle } from '@/components/ModeToggle'
 import { Footer } from '@/components/Footer'
+import { AboutModal, AboutButton } from '@/components/AboutModal'
 import { useWorkflowExecution } from '@/hooks/useWorkflowExecution'
 import { scenarios } from '@/lib/scenarios'
 import type { Scenario, DemoMode } from '@/types'
@@ -17,6 +18,16 @@ import type { Scenario, DemoMode } from '@/types'
 export default function Home() {
   const [selectedScenario, setSelectedScenario] = useState<Scenario | null>(null)
   const [mode, setMode] = useState<DemoMode>('simulation')
+  const [isAboutOpen, setIsAboutOpen] = useState(false)
+  
+  // Show About modal on first visit
+  useEffect(() => {
+    const hasVisited = localStorage.getItem('ai-incident-agent-visited')
+    if (!hasVisited) {
+      setIsAboutOpen(true)
+      localStorage.setItem('ai-incident-agent-visited', 'true')
+    }
+  }, [])
   
   const {
     steps,
@@ -70,6 +81,7 @@ export default function Home() {
           
           {/* Controls Row */}
           <div className="flex items-center gap-3 w-full sm:w-auto">
+            <AboutButton onClick={() => setIsAboutOpen(true)} />
             <ModeToggle mode={mode} onModeChange={setMode} disabled={isRunning} />
             
             <div className="flex items-center gap-2 ml-auto sm:ml-0">
@@ -165,6 +177,9 @@ export default function Home() {
       
       {/* Footer */}
       <Footer />
+      
+      {/* About Modal */}
+      <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
     </main>
   )
 }
