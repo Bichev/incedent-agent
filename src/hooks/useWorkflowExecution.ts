@@ -143,18 +143,26 @@ export function useWorkflowExecution(
         } else {
           // Live mode - trigger actual n8n workflow
           if (i === 0) {
-            const response = await triggerN8nWorkflow(scenario)
-            
-            if (response.success && response.data) {
-              setMetrics(prev => ({
-                ...prev,
-                confidenceScore: response.data?.confidenceScore || scenario.expectedConfidence,
-              }))
-            }
+            // Fire off n8n workflow without blocking UI progression
+            triggerN8nWorkflow(scenario)
+              .then(response => {
+                console.log('n8n workflow completed:', response)
+                if (response.success && response.data) {
+                  setMetrics(prev => ({
+                    ...prev,
+                    confidenceScore: response.data?.confidenceScore || scenario.expectedConfidence,
+                    resolutionPath: (response.data?.resolutionPath as typeof prev.resolutionPath) || scenario.expectedPath,
+                  }))
+                }
+              })
+              .catch(error => {
+                console.error('n8n workflow error:', error)
+              })
           }
           
-          // Still simulate the visual steps with shorter delays
-          await new Promise(resolve => setTimeout(resolve, 800))
+          // Simulate the visual steps with appropriate delays
+          const stepDelay = i === 2 || i === 4 ? 1500 : 800 // Longer for AI steps
+          await new Promise(resolve => setTimeout(resolve, stepDelay))
           
           if (executionRef.current.cancelled) break
           
@@ -162,9 +170,18 @@ export function useWorkflowExecution(
             idx === i ? { 
               ...step, 
               status: 'completed' as const,
-              duration: 800,
+              duration: stepDelay,
             } : step
           ))
+
+          // Update metrics on decision step
+          if (updatedSteps[i].id === 'decision') {
+            setMetrics(prev => ({
+              ...prev,
+              confidenceScore: prev.confidenceScore || scenario.expectedConfidence,
+              resolutionPath: prev.resolutionPath || scenario.expectedPath,
+            }))
+          }
         }
       } catch (error) {
         console.error(`Error in step ${updatedSteps[i].id}:`, error)

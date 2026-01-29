@@ -179,11 +179,10 @@ export function generateStepResult(stepId: string, scenario: Scenario): StepResu
     case 'notifications':
       return {
         success: true,
-        message: 'Notifications sent: Slack, Email, Sheets',
+        message: 'Notifications sent: Slack, Email',
         data: {
           slack: { sent: true, channel: '#incident-alerts' },
           email: { sent: true, to: scenario.incident.user_email },
-          sheets: { logged: true, row: Math.floor(Math.random() * 100) + 1 },
         },
       }
     
@@ -236,11 +235,6 @@ export function generateIntegrationResults(scenario: Scenario): IntegrationResul
         scenario.expectedPath === 'assisted' ? 'Under Investigation' : 'Escalated'
       }`,
       sent: true,
-    },
-    sheets: {
-      rowNumber: Math.floor(Math.random() * 100) + 1,
-      sheetName: 'Incident Log',
-      logged: true,
     },
   }
 }

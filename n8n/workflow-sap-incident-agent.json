@@ -375,11 +375,11 @@
     },
     {
       "parameters": {
-        "fromEmail": "support@yourdomain.com",
-        "toEmail": "={{ $json.user_email }}",
-        "subject": "Incident {{ $json.incident_id }} - {{ $json.recommended_action === 'auto_resolve' ? 'Resolved' : $json.recommended_action === 'assisted' ? 'Under Investigation' : 'Escalated' }}",
+        "fromEmail": "admin@jaxaiagency.com",
+        "toEmail": "={{ $('Parse Decision').first().json.user_email }}",
+        "subject": "Incident {{ $('Parse Decision').first().json.incident_id }} - {{ $('Parse Decision').first().json.recommended_action === 'auto_resolve' ? 'Resolved' : $('Parse Decision').first().json.recommended_action === 'assisted' ? 'Under Investigation' : 'Escalated' }}",
         "emailType": "html",
-        "message": "<h2>Your incident has been {{ $json.recommended_action === 'auto_resolve' ? 'resolved' : $json.recommended_action === 'assisted' ? 'assigned for investigation' : 'escalated to our expert team' }}</h2><p><strong>Incident ID:</strong> {{ $json.incident_id }}</p><p><strong>Title:</strong> {{ $json.title }}</p>{{ $json.recommended_action === 'auto_resolve' ? '<h3>Resolution Steps:</h3><ol>' + $json.resolution_steps.map(s => '<li>' + s + '</li>').join('') + '</ol>' : '' }}<p><a href=\"https://YOUR_DOMAIN.atlassian.net/browse/{{ $json.jira_key }}\">View Ticket</a></p><p>Best regards,<br>IT Support Team</p>",
+        "message": "<h2>Your incident has been {{ $('Parse Decision').first().json.recommended_action === 'auto_resolve' ? 'resolved' : $('Parse Decision').first().json.recommended_action === 'assisted' ? 'assigned for investigation' : 'escalated to our expert team' }}</h2><p><strong>Incident ID:</strong> {{ $('Parse Decision').first().json.incident_id }}</p><p><strong>Title:</strong> {{ $('Parse Decision').first().json.title }}</p><p><strong>Error Code:</strong> {{ $('Parse Decision').first().json.error_code }}</p><p><strong>Component:</strong> {{ $('Parse Decision').first().json.component }}</p><p><strong>Confidence:</strong> {{ $('Parse Decision').first().json.confidence_score }}%</p>{{ $('Parse Decision').first().json.recommended_action === 'auto_resolve' ? '<h3>Resolution Steps:</h3><ol>' + ($('Parse Decision').first().json.resolution_steps || []).map(s => '<li>' + s + '</li>').join('') + '</ol>' : '' }}<p><a href=\"https://jaxaiagency.atlassian.net/browse/{{ $('Parse Decision').first().json.jira_key }}\">View Jira Ticket</a></p><p>Best regards,<br>JAX AI Agency Support Team</p>",
         "options": {}
       },
       "id": "email-send",
@@ -390,44 +390,7 @@
       "credentials": {
         "smtp": {
           "id": "SMTP_CREDENTIAL_ID",
-          "name": "Gmail SMTP"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "append",
-        "documentId": {
-          "__rl": true,
-          "mode": "id",
-          "value": "YOUR_SPREADSHEET_ID"
-        },
-        "sheetName": "Sheet1",
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "Timestamp": "={{ new Date().toISOString() }}",
-            "Incident ID": "={{ $json.incident_id }}",
-            "Title": "={{ $json.title }}",
-            "Component": "={{ $json.component }}",
-            "Severity": "={{ $json.severity }}",
-            "Status": "={{ $json.recommended_action === 'auto_resolve' ? 'Auto-Resolved' : $json.recommended_action === 'assisted' ? 'Assisted' : 'Escalated' }}",
-            "Confidence": "={{ $json.confidence_score }}%",
-            "Resolution Time": "={{ $json.estimated_time }}",
-            "Cost Saved": "={{ $json.recommended_action === 'auto_resolve' ? '$60' : $json.recommended_action === 'assisted' ? '$45' : '$30' }}"
-          }
-        },
-        "options": {}
-      },
-      "id": "sheets-log",
-      "name": "Sheets - Log Incident",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.3,
-      "position": [2720, 300],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "SHEETS_CREDENTIAL_ID",
-          "name": "Google Sheets"
+          "name": "SMTP"
         }
       }
     },
@@ -613,17 +576,6 @@
       ]
     },
     "Email - Notify User": {
-      "main": [
-        [
-          {
-            "node": "Sheets - Log Incident",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Sheets - Log Incident": {
       "main": [
         [
           {

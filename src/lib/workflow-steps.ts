@@ -47,7 +47,7 @@ export const workflowStepTemplates: Omit<WorkflowStep, 'status' | 'duration' | '
   {
     id: 'notifications',
     name: 'Send Notifications',
-    description: 'Notifying via Slack, Email, and Google Sheets',
+    description: 'Notifying via Slack and Email',
     icon: 'Bell',
   },
   {

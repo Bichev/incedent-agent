@@ -9,7 +9,6 @@ import {
   BookOpen,
   MessageCircle,
   Mail,
-  Sheet,
   Hourglass
 } from 'lucide-react'
 import type { IntegrationResults, Scenario } from '@/types'
@@ -20,14 +19,13 @@ interface ResultsPanelProps {
   isComplete: boolean
 }
 
-type TabId = 'jira' | 'confluence' | 'slack' | 'email' | 'sheets'
+type TabId = 'jira' | 'confluence' | 'slack' | 'email'
 
 const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
   { id: 'jira', label: 'Jira', icon: <Ticket className="w-4 h-4" /> },
   { id: 'confluence', label: 'Confluence', icon: <BookOpen className="w-4 h-4" /> },
   { id: 'slack', label: 'Slack', icon: <MessageCircle className="w-4 h-4" /> },
   { id: 'email', label: 'Email', icon: <Mail className="w-4 h-4" /> },
-  { id: 'sheets', label: 'Sheets', icon: <Sheet className="w-4 h-4" /> },
 ]
 
 export function ResultsPanel({ results, scenario, isComplete }: ResultsPanelProps) {
@@ -39,7 +37,7 @@ export function ResultsPanel({ results, scenario, isComplete }: ResultsPanelProp
         <span className="text-4xl mb-4">📊</span>
         <h3 className="text-lg font-medium text-gray-300 mb-2">Integration Results</h3>
         <p className="text-sm text-gray-500">
-          Results from Jira, Confluence, Slack, Email, and Google Sheets will appear here
+          Results from Jira, Confluence, Slack, and Email will appear here
         </p>
       </div>
     )
@@ -102,9 +100,6 @@ export function ResultsPanel({ results, scenario, isComplete }: ResultsPanelProp
               )}
               {activeTab === 'email' && results?.email && (
                 <EmailPreview result={results.email} scenario={scenario} />
-              )}
-              {activeTab === 'sheets' && results?.sheets && (
-                <SheetsPreview result={results.sheets} scenario={scenario} />
               )}
             </motion.div>
           )}
@@ -344,65 +339,3 @@ function EmailPreview({ result, scenario }: { result: NonNullable<IntegrationRes
   )
 }
 
-function SheetsPreview({ result, scenario }: { result: NonNullable<IntegrationResults['sheets']>; scenario: Scenario }) {
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <CheckCircle className="w-5 h-5 text-green-400" />
-        <span className="font-medium text-white">Row Added</span>
-        <span className="text-sm text-gray-500">Row #{result.rowNumber}</span>
-      </div>
-
-      <div className="bg-slate-800/50 rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-900/50">
-              <tr>
-                <th className="text-left py-2 px-3 text-gray-400 font-medium">Field</th>
-                <th className="text-left py-2 px-3 text-gray-400 font-medium">Value</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-700">
-              <tr>
-                <td className="py-2 px-3 text-gray-400">Timestamp</td>
-                <td className="py-2 px-3 text-white">{new Date().toLocaleString()}</td>
-              </tr>
-              <tr>
-                <td className="py-2 px-3 text-gray-400">Incident ID</td>
-                <td className="py-2 px-3 text-white">{scenario.incident.id}</td>
-              </tr>
-              <tr>
-                <td className="py-2 px-3 text-gray-400">Title</td>
-                <td className="py-2 px-3 text-white">{scenario.incident.title}</td>
-              </tr>
-              <tr>
-                <td className="py-2 px-3 text-gray-400">Severity</td>
-                <td className="py-2 px-3 text-white">{scenario.incident.severity}</td>
-              </tr>
-              <tr>
-                <td className="py-2 px-3 text-gray-400">Status</td>
-                <td className="py-2 px-3">
-                  <span className={`capitalize ${
-                    scenario.expectedPath === 'auto_resolve' ? 'text-green-400' :
-                    scenario.expectedPath === 'assisted' ? 'text-yellow-400' :
-                    'text-red-400'
-                  }`}>
-                    {scenario.expectedPath.replace('_', ' ')}
-                  </span>
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 px-3 text-gray-400">Confidence</td>
-                <td className="py-2 px-3 text-white">{scenario.expectedConfidence}%</td>
-              </tr>
-              <tr>
-                <td className="py-2 px-3 text-gray-400">Cost Saved</td>
-                <td className="py-2 px-3 text-green-400">{scenario.costSaved}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  )
-}

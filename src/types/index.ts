@@ -78,7 +78,6 @@ export interface IntegrationResults {
   confluence: ConfluenceResult | null
   slack: SlackResult | null
   email: EmailResult | null
-  sheets: SheetsResult | null
 }
 
 export interface JiraResult {
@@ -106,12 +105,6 @@ export interface EmailResult {
   to: string
   subject: string
   sent: boolean
-}
-
-export interface SheetsResult {
-  rowNumber: number
-  sheetName: string
-  logged: boolean
 }
 
 // Similar incident from Pinecone

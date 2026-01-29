@@ -71,7 +71,6 @@ An intelligent AI agent that:
 - **Confluence:** Builds searchable knowledge base
 - **Slack:** Real-time team notifications
 - **Email:** User communications
-- **Google Sheets:** Management reporting and metrics
 
 ---
 
@@ -88,7 +87,6 @@ An intelligent AI agent that:
 | **Knowledge Base** | Confluence Cloud | Documentation repository |
 | **Notifications** | Slack | Team alerts and collaboration |
 | **Communication** | Email (SMTP) | User notifications |
-| **Reporting** | Google Sheets | Metrics and logging |
 
 ### Data Flow
 
@@ -109,7 +107,7 @@ SAP Incident → Webhook → n8n → Jira (ticket created)
               ↓            ↓           ↓
          Update Jira → Confluence KB Article
               ↓            ↓           ↓
-         Slack + Email + Google Sheets
+              Slack + Email Notifications
 ```
 
 ---
@@ -189,7 +187,7 @@ SAP Incident → Webhook → n8n → Jira (ticket created)
 - Mock SAP incidents via webhook
 - 5-6 historical incidents in knowledge base
 - 3 demo scenarios (auto-resolve, assisted, escalate)
-- Integration with Jira, Confluence, Slack, Email, Sheets
+- Integration with Jira, Confluence, Slack, Email
 
 **Deliverables:**
 - Working n8n workflow
@@ -237,7 +235,6 @@ SAP Incident → Webhook → n8n → Jira (ticket created)
 - ✅ Confluence articles generated with proper formatting
 - ✅ Slack notifications delivered with links
 - ✅ Email sent to user with resolution
-- ✅ Google Sheets updated with incident log
 - ✅ Demo completes in under 7 minutes
 - ✅ Sunil understands the value proposition
 
@@ -264,16 +261,14 @@ SAP Incident → Webhook → n8n → Jira (ticket created)
 - **Pinecone:** Free tier (100K vectors)
 - **Atlassian Cloud:** Jira + Confluence (free tier, 10 users)
 - **Slack:** Free workspace
-- **Gmail/SMTP:** For email notifications
-- **Google Sheets:** Free Google account
+- **SMTP:** For email notifications
 
 ### API Credentials Needed
 1. OpenAI API key
 2. Pinecone API key + index name
 3. Atlassian email + API token
 4. Slack webhook URL
-5. Gmail/SMTP credentials
-6. Google Sheets OAuth credentials
+5. SMTP credentials
 
 ---
 
@@ -339,8 +334,7 @@ SAP Incident → Webhook → n8n → Jira (ticket created)
 - [ ] Jira configured with custom fields
 - [ ] Confluence space created with sample articles
 - [ ] Slack channels set up with webhooks
-- [ ] Gmail/SMTP configured for sending
-- [ ] Google Sheets created with headers
+- [ ] SMTP configured for sending
 - [ ] Postman requests ready for all 3 scenarios
 - [ ] Backup screen recording prepared
 - [ ] Demo script printed/available
@@ -350,8 +344,7 @@ SAP Incident → Webhook → n8n → Jira (ticket created)
 - [ ] Open Jira in another tab
 - [ ] Open Confluence in another tab
 - [ ] Open Slack in another tab/window
-- [ ] Open Gmail in another tab
-- [ ] Open Google Sheets in another tab
+- [ ] Open Email in another tab
 - [ ] Open Postman with scenarios ready
 - [ ] Test one request end-to-end
 - [ ] Clear Slack test messages

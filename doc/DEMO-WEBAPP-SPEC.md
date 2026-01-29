@@ -23,7 +23,7 @@ This document specifies the web application that demonstrates the SAP Incident M
 - **9-Step Workflow Visualization**: Animated step-by-step execution
 - **Dual Mode Operation**: Simulation (mock data) or Live (n8n webhook)
 - **Real-time Metrics**: SLA countdown, confidence scores, cost savings
-- **Integration Previews**: Jira, Confluence, Slack, Email, Google Sheets
+- **Integration Previews**: Jira, Confluence, Slack, Email
 
 ---
 
@@ -87,7 +87,7 @@ The application uses a 3-column responsive layout:
 |  - Assisted     |  - Step 2: Jira    |  - Conf    |
 |  - Escalate     |  - Step 3: AI      |  - Slack   |
 |                 |  - Step 4: Search  |  - Email   |
-|  SLA Dashboard  |  - Step 5: Decide  |  - Sheets  |
+|  SLA Dashboard  |  - Step 5: Decide  |            |
 |  - Timer        |  - Step 6: Update  |            |
 |  - Confidence   |  - Step 7: KB      |            |
 |  - Savings      |  - Step 8: Notify  |            |
@@ -182,7 +182,6 @@ Tabbed display of integration results.
 2. **Confluence**: KB article preview (auto-resolve only)
 3. **Slack**: Message preview with formatting
 4. **Email**: Email preview with body content
-5. **Sheets**: Table row preview
 
 ### 4.6 ModeToggle
 
@@ -261,7 +260,7 @@ The demo visualizes 9 workflow steps:
 | 5 | decision | Resolution Decision | Calculate confidence | 1.5-3s |
 | 6 | jira-update | Update Jira | Update ticket status | 0.8-1.5s |
 | 7 | confluence | Create Confluence KB | Document resolution | 1-2s |
-| 8 | notifications | Send Notifications | Slack, Email, Sheets | 1.5-2.5s |
+| 8 | notifications | Send Notifications | Slack, Email | 1.5-2.5s |
 | 9 | complete | Workflow Complete | Summary and metrics | 0.3-0.5s |
 
 ---

@@ -24,6 +24,12 @@ export async function triggerN8nWorkflow(scenario: Scenario): Promise<N8nRespons
   }
 
   try {
+    // Create abort controller for timeout
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 60000) // 60 second timeout
+
+    console.log('Triggering n8n workflow:', N8N_WEBHOOK_URL)
+    
     const response = await fetch(N8N_WEBHOOK_URL, {
       method: 'POST',
       headers: {
@@ -40,13 +46,19 @@ export async function triggerN8nWorkflow(scenario: Scenario): Promise<N8nRespons
         user_impact: scenario.incident.user_impact,
         timestamp: new Date().toISOString(),
       }),
+      signal: controller.signal,
     })
 
+    clearTimeout(timeoutId)
+
     if (!response.ok) {
+      const errorText = await response.text()
+      console.error('n8n response error:', response.status, errorText)
       throw new Error(`HTTP error! status: ${response.status}`)
     }
 
     const data = await response.json()
+    console.log('n8n workflow response:', data)
     
     return {
       success: true,
@@ -59,6 +71,13 @@ export async function triggerN8nWorkflow(scenario: Scenario): Promise<N8nRespons
       },
     }
   } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.error('n8n workflow timed out after 60 seconds')
+      return {
+        success: false,
+        error: 'Workflow timed out. The n8n workflow may still be running.',
+      }
+    }
     console.error('Error triggering n8n workflow:', error)
     return {
       success: false,
