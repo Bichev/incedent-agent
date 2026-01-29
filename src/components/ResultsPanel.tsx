@@ -9,7 +9,8 @@ import {
   BookOpen,
   MessageCircle,
   Mail,
-  Hourglass
+  Hourglass,
+  Layers
 } from 'lucide-react'
 import type { IntegrationResults, Scenario, Incident } from '@/types'
 
@@ -38,7 +39,9 @@ export function ResultsPanel({ results, scenario, isComplete, generatedIncident 
   if (!scenario) {
     return (
       <div className="glass-card p-6 h-full flex flex-col items-center justify-center text-center">
-        <span className="text-4xl mb-4">📊</span>
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center mb-4 shadow-lg shadow-purple-500/20">
+          <Layers className="w-8 h-8 text-white" />
+        </div>
         <h3 className="text-lg font-medium text-gray-300 mb-2">Integration Results</h3>
         <p className="text-sm text-gray-500">
           Results from Jira, Confluence, Slack, and Email will appear here
