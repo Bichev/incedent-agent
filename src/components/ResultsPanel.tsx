@@ -11,12 +11,13 @@ import {
   Mail,
   Hourglass
 } from 'lucide-react'
-import type { IntegrationResults, Scenario } from '@/types'
+import type { IntegrationResults, Scenario, Incident } from '@/types'
 
 interface ResultsPanelProps {
   results: IntegrationResults | null
   scenario: Scenario | null
   isComplete: boolean
+  generatedIncident?: Incident | null
 }
 
 type TabId = 'jira' | 'confluence' | 'slack' | 'email'
@@ -28,8 +29,11 @@ const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
   { id: 'email', label: 'Email', icon: <Mail className="w-4 h-4" /> },
 ]
 
-export function ResultsPanel({ results, scenario, isComplete }: ResultsPanelProps) {
+export function ResultsPanel({ results, scenario, isComplete, generatedIncident }: ResultsPanelProps) {
   const [activeTab, setActiveTab] = useState<TabId>('jira')
+  
+  // Use generated incident if available, otherwise fall back to scenario incident
+  const incident = generatedIncident || scenario?.incident
 
   if (!scenario) {
     return (
@@ -89,17 +93,17 @@ export function ResultsPanel({ results, scenario, isComplete }: ResultsPanelProp
               exit={{ opacity: 0, y: -10 }}
               className="space-y-4"
             >
-              {activeTab === 'jira' && results?.jira && (
-                <JiraPreview result={results.jira} scenario={scenario} />
+              {activeTab === 'jira' && results?.jira && incident && (
+                <JiraPreview result={results.jira} scenario={scenario} incident={incident} />
               )}
-              {activeTab === 'confluence' && (
-                <ConfluencePreview result={results?.confluence ?? null} scenario={scenario} />
+              {activeTab === 'confluence' && incident && (
+                <ConfluencePreview result={results?.confluence ?? null} scenario={scenario} incident={incident} />
               )}
-              {activeTab === 'slack' && results?.slack && (
-                <SlackPreview result={results.slack} scenario={scenario} />
+              {activeTab === 'slack' && results?.slack && incident && (
+                <SlackPreview result={results.slack} scenario={scenario} incident={incident} />
               )}
-              {activeTab === 'email' && results?.email && (
-                <EmailPreview result={results.email} scenario={scenario} />
+              {activeTab === 'email' && results?.email && incident && (
+                <EmailPreview result={results.email} scenario={scenario} incident={incident} />
               )}
             </motion.div>
           )}
@@ -109,7 +113,7 @@ export function ResultsPanel({ results, scenario, isComplete }: ResultsPanelProp
   )
 }
 
-function JiraPreview({ result, scenario }: { result: NonNullable<IntegrationResults['jira']>; scenario: Scenario }) {
+function JiraPreview({ result, scenario, incident }: { result: NonNullable<IntegrationResults['jira']>; scenario: Scenario | null; incident: Incident }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -132,14 +136,14 @@ function JiraPreview({ result, scenario }: { result: NonNullable<IntegrationResu
           <span className="text-lg font-semibold text-blue-400">{result.ticketId}</span>
           <span className={`px-2 py-1 rounded text-xs font-medium ${
             result.status === 'Resolved' ? 'bg-green-500/20 text-green-400' :
-            result.status === 'In Progress' ? 'bg-yellow-500/20 text-yellow-400' :
+            result.status === 'In Progress' || result.status === 'Review' ? 'bg-yellow-500/20 text-yellow-400' :
             'bg-red-500/20 text-red-400'
           }`}>
             {result.status}
           </span>
         </div>
         
-        <h3 className="text-white font-medium">{scenario.incident.title}</h3>
+        <h3 className="text-white font-medium">{incident.title}</h3>
         
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div>
@@ -154,7 +158,7 @@ function JiraPreview({ result, scenario }: { result: NonNullable<IntegrationResu
           )}
         </div>
 
-        {scenario.expectedPath === 'auto_resolve' && scenario.resolution && (
+        {scenario?.expectedPath === 'auto_resolve' && scenario.resolution && (
           <div className="pt-3 border-t border-gray-700">
             <p className="text-sm text-gray-400 mb-2">Resolution Steps:</p>
             <ol className="list-decimal list-inside space-y-1 text-sm text-gray-300">
@@ -172,7 +176,7 @@ function JiraPreview({ result, scenario }: { result: NonNullable<IntegrationResu
   )
 }
 
-function ConfluencePreview({ result, scenario }: { result: IntegrationResults['confluence']; scenario: Scenario }) {
+function ConfluencePreview({ result, scenario, incident }: { result: IntegrationResults['confluence']; scenario: Scenario | null; incident: Incident }) {
   if (!result) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -213,11 +217,11 @@ function ConfluencePreview({ result, scenario }: { result: IntegrationResults['c
         <div className="space-y-3 text-sm">
           <div className="p-3 bg-slate-900/50 rounded border-l-2 border-blue-500">
             <p className="text-gray-400 mb-1">Incident Details</p>
-            <p className="text-gray-300">ID: {scenario.incident.id}</p>
-            <p className="text-gray-300">Error: {scenario.incident.error_code}</p>
+            <p className="text-gray-300">ID: {incident.id}</p>
+            <p className="text-gray-300">Error: {incident.error_code}</p>
           </div>
           
-          {scenario.resolution && (
+          {scenario?.resolution && (
             <div className="p-3 bg-slate-900/50 rounded border-l-2 border-green-500">
               <p className="text-gray-400 mb-1">Resolution Steps</p>
               <ol className="list-decimal list-inside text-gray-300">
@@ -233,7 +237,7 @@ function ConfluencePreview({ result, scenario }: { result: IntegrationResults['c
   )
 }
 
-function SlackPreview({ result, scenario }: { result: NonNullable<IntegrationResults['slack']>; scenario: Scenario }) {
+function SlackPreview({ result, scenario, incident }: { result: NonNullable<IntegrationResults['slack']>; scenario: Scenario | null; incident: Incident }) {
   const getMessageStyle = () => {
     switch (result.messageType) {
       case 'success': return 'border-l-green-500 bg-green-500/5'
@@ -276,13 +280,13 @@ function SlackPreview({ result, scenario }: { result: NonNullable<IntegrationRes
                    result.messageType === 'warning' ? 'Assisted Resolution: ' :
                    'Escalated: '}
                 </strong>
-                {scenario.incident.id}
+                {incident.id}
               </p>
-              <p><strong>Incident:</strong> {scenario.incident.title}</p>
-              <p><strong>Confidence:</strong> {scenario.expectedConfidence}%</p>
+              <p><strong>Incident:</strong> {incident.title}</p>
+              <p><strong>Confidence:</strong> {scenario?.expectedConfidence || 0}%</p>
               <div className="flex gap-2 mt-2">
                 <span className="px-2 py-1 bg-slate-700 rounded text-xs">View Ticket</span>
-                {scenario.expectedPath === 'auto_resolve' && (
+                {scenario?.expectedPath === 'auto_resolve' && (
                   <span className="px-2 py-1 bg-slate-700 rounded text-xs">View KB</span>
                 )}
               </div>
@@ -294,7 +298,7 @@ function SlackPreview({ result, scenario }: { result: NonNullable<IntegrationRes
   )
 }
 
-function EmailPreview({ result, scenario }: { result: NonNullable<IntegrationResults['email']>; scenario: Scenario }) {
+function EmailPreview({ result, scenario, incident }: { result: NonNullable<IntegrationResults['email']>; scenario: Scenario | null; incident: Incident }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
@@ -315,14 +319,14 @@ function EmailPreview({ result, scenario }: { result: NonNullable<IntegrationRes
         <div className="p-4 text-sm text-gray-300 space-y-3">
           <p>Dear User,</p>
           <p>
-            Your incident <strong className="text-white">{scenario.incident.id}</strong> has been 
-            {scenario.expectedPath === 'auto_resolve' 
+            Your incident <strong className="text-white">{incident.id}</strong> has been 
+            {scenario?.expectedPath === 'auto_resolve' 
               ? ' automatically resolved by our AI system.'
-              : scenario.expectedPath === 'assisted'
+              : scenario?.expectedPath === 'assisted'
               ? ' assigned to a specialist for investigation.'
               : ' escalated to our expert team for immediate attention.'}
           </p>
-          {scenario.expectedPath === 'auto_resolve' && scenario.resolution && (
+          {scenario?.expectedPath === 'auto_resolve' && scenario.resolution && (
             <div>
               <p className="mb-2">Resolution steps:</p>
               <ol className="list-decimal list-inside pl-2 space-y-1">

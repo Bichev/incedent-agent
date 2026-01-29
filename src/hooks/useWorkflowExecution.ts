@@ -10,7 +10,7 @@ import type {
   Incident
 } from '@/types'
 import { createInitialSteps } from '@/lib/workflow-steps'
-import { simulateStep, generateIntegrationResults } from '@/lib/simulation-engine'
+import { simulateStep, generateIntegrationResults, N8nResultData } from '@/lib/simulation-engine'
 import { triggerN8nWorkflow, generateIncident } from '@/lib/n8n-client'
 
 interface UseWorkflowExecutionReturn {
@@ -50,6 +50,7 @@ export function useWorkflowExecution(
   const executionRef = useRef<{ cancelled: boolean }>({ cancelled: false })
   const slaIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const generatedIncidentRef = useRef<Incident | null>(null)
+  const n8nResultRef = useRef<N8nResultData | null>(null)
 
   // SLA timer effect
   useEffect(() => {
@@ -81,6 +82,7 @@ export function useWorkflowExecution(
   const resetExecution = useCallback(() => {
     executionRef.current.cancelled = true
     generatedIncidentRef.current = null
+    n8nResultRef.current = null
     if (slaIntervalRef.current) {
       clearInterval(slaIntervalRef.current)
     }
@@ -178,11 +180,23 @@ export function useWorkflowExecution(
               .then(response => {
                 console.log('n8n workflow completed:', response)
                 if (response.success && response.data) {
+                  // Store n8n result data for integration results
+                  const n8nData: N8nResultData = {
+                    jiraTicket: response.data.jiraTicket,
+                    confluencePage: response.data.confluencePage,
+                    resolutionPath: response.data.resolutionPath,
+                  }
+                  n8nResultRef.current = n8nData
+                  
+                  // Update metrics
                   setMetrics(prev => ({
                     ...prev,
                     confidenceScore: response.data?.confidenceScore || scenario.expectedConfidence,
                     resolutionPath: (response.data?.resolutionPath as typeof prev.resolutionPath) || scenario.expectedPath,
                   }))
+                  
+                  // Update results with real n8n data (in case UI finished before n8n)
+                  setResults(generateIntegrationResults(scenario, n8nData))
                 }
               })
               .catch(error => {
@@ -231,8 +245,9 @@ export function useWorkflowExecution(
       const endTime = Date.now()
       const totalDuration = (endTime - startTime) / 1000
       
-      // Generate final results
-      const finalResults = generateIntegrationResults(scenario)
+      // Generate final results - use n8n data in live mode
+      const n8nData = mode === 'live' ? n8nResultRef.current || undefined : undefined
+      const finalResults = generateIntegrationResults(scenario, n8nData)
       setResults(finalResults)
       
       setMetrics(prev => ({

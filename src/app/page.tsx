@@ -157,6 +157,7 @@ export default function Home() {
               results={results}
               scenario={selectedScenario}
               isComplete={results !== null}
+              generatedIncident={generatedIncident}
             />
           </div>
         </div>

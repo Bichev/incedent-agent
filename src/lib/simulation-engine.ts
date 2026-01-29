@@ -215,37 +215,53 @@ export function generateStepResult(stepId: string, scenario: Scenario, generated
   }
 }
 
+// N8n response data for live mode
+export interface N8nResultData {
+  jiraTicket?: string
+  confluencePage?: string | null
+  resolutionPath?: string
+}
+
 // Generate integration results for the results panel
-export function generateIntegrationResults(scenario: Scenario): IntegrationResults {
-  const ticketId = `SAP-${Math.floor(Math.random() * 1000) + 100}`
+export function generateIntegrationResults(
+  scenario: Scenario, 
+  n8nData?: N8nResultData
+): IntegrationResults {
+  // Use actual n8n data if available, otherwise generate mock data
+  const ticketId = n8nData?.jiraTicket || `SAP-${Math.floor(Math.random() * 1000) + 100}`
+  const jiraBaseUrl = n8nData?.jiraTicket 
+    ? 'https://jaxaiagency.atlassian.net/browse' 
+    : 'https://jira.atlassian.net/browse'
+  
+  const resolutionPath = n8nData?.resolutionPath || scenario.expectedPath
   
   return {
     jira: {
       ticketId,
-      ticketUrl: `https://jira.atlassian.net/browse/${ticketId}`,
-      status: scenario.expectedPath === 'auto_resolve' ? 'Resolved' :
-              scenario.expectedPath === 'assisted' ? 'In Progress' : 'Escalated',
+      ticketUrl: `${jiraBaseUrl}/${ticketId}`,
+      status: resolutionPath === 'auto_resolve' ? 'Resolved' :
+              resolutionPath === 'assisted' ? 'Review' : 'Escalated',
       priority: scenario.incident.severity,
-      assignee: scenario.expectedPath === 'assisted' ? 'L2 Analyst' :
-                scenario.expectedPath === 'escalate' ? 'Basis Team' : undefined,
+      assignee: resolutionPath === 'assisted' ? 'L2 Analyst' :
+                resolutionPath === 'escalate' ? 'Basis Team' : undefined,
     },
-    confluence: scenario.expectedPath === 'auto_resolve' ? {
-      pageId: '123456',
-      pageUrl: 'https://confluence.atlassian.net/wiki/spaces/SAPKB/pages/123456',
+    confluence: resolutionPath === 'auto_resolve' ? {
+      pageId: n8nData?.confluencePage ? 'live' : '123456',
+      pageUrl: n8nData?.confluencePage || 'https://confluence.atlassian.net/wiki/spaces/SAPKB/pages/123456',
       title: `${scenario.incident.id} - ${scenario.incident.error_code} Resolution`,
       space: 'SAPKB',
     } : null,
     slack: {
       channel: '#incident-alerts',
-      messageType: scenario.expectedPath === 'auto_resolve' ? 'success' :
-                   scenario.expectedPath === 'assisted' ? 'warning' : 'error',
+      messageType: resolutionPath === 'auto_resolve' ? 'success' :
+                   resolutionPath === 'assisted' ? 'warning' : 'error',
       timestamp: new Date().toISOString(),
     },
     email: {
       to: scenario.incident.user_email || 'user@company.com',
       subject: `Incident ${scenario.incident.id} - ${
-        scenario.expectedPath === 'auto_resolve' ? 'Resolved' :
-        scenario.expectedPath === 'assisted' ? 'Under Investigation' : 'Escalated'
+        resolutionPath === 'auto_resolve' ? 'Resolved' :
+        resolutionPath === 'assisted' ? 'Under Investigation' : 'Escalated'
       }`,
       sent: true,
     },
