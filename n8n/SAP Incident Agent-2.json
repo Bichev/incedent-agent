@@ -1,0 +1,707 @@
+{
+  "name": "SAP Incident Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "incident-agent",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "448cc500-5497-46aa-8403-f42eeb9a622b",
+      "name": "Webhook - Receive Incident",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -2032,
+        368
+      ],
+      "webhookId": "1e214c70-8f65-4736-8d49-d92c9d23aadc"
+    },
+    {
+      "parameters": {
+        "project": {
+          "__rl": true,
+          "value": "10001",
+          "mode": "list",
+          "cachedResultName": "Demo Team"
+        },
+        "issueType": {
+          "__rl": true,
+          "value": "10008",
+          "mode": "list",
+          "cachedResultName": "Story"
+        },
+        "summary": "={{ $json.body.title }}",
+        "additionalFields": {
+          "description": "=Incident ID: {{ $json.body.incident_id }}\n\n{{ $json.body.description }}\n\nError Code: {{ $json.body.error_code }}\nComponent: {{ $json.body.component }}\nSeverity: {{ $json.body.severity }}\nUser: {{ $json.body.user_email }}\nImpact: {{ $json.body.user_impact }}",
+          "priority": {
+            "__rl": true,
+            "value": "={{ $json.body.severity === 'Critical' ? '1' : $json.body.severity === 'High' ? '2' : '3' }}",
+            "mode": ""
+          }
+        }
+      },
+      "id": "dc0f1858-ad6f-447a-a187-55dd94618473",
+      "name": "Jira - Create Issue",
+      "type": "n8n-nodes-base.jira",
+      "typeVersion": 1,
+      "position": [
+        -1824,
+        368
+      ],
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "WwpdwS77EuW3YIaI",
+          "name": "Jira SW Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an SAP incident analyst. Analyze the incident and classify it.\n\nReturn a JSON object with:\n- category: The incident category (Access/Authorization, Performance, System Error, Configuration, Network)\n- urgency: Urgency level (Immediate, High, Normal, Low)\n- complexity: Complexity (Routine, Moderate, Complex)\n- probable_cause: Most likely cause\n- keywords: Array of relevant keywords",
+              "role": "system"
+            },
+            {
+              "content": "=Analyze this SAP incident:\n\nTitle: {{ $('Webhook - Receive Incident').item.json.body.title }}\nDescription: {{ $('Webhook - Receive Incident').item.json.body.description }}\nError Code: {{ $('Webhook - Receive Incident').item.json.body.error_code }}\nComponent: {{ $('Webhook - Receive Incident').item.json.body.component }}\nSeverity: {{ $('Webhook - Receive Incident').item.json.body.severity }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "id": "b981bcb8-331b-4ef3-b1d6-d03cf73cd4f1",
+      "name": "OpenAI - Classify Incident",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.3,
+      "position": [
+        -1648,
+        368
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "NNLoY0Gdl64ume27",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are an SAP incident resolution decision engine. Based on the current incident and similar historical incidents, determine the best course of action.\n\nReturn a JSON object with:\n- confidence_score: 0-100 (how confident you are in the resolution)\n- recommended_action: \"auto_resolve\" | \"assisted\" | \"escalate\"\n- reasoning: Brief explanation of your decision\n- resolution_steps: Array of steps (if auto_resolve)\n- diagnostic_hints: Array of hints (if assisted or escalate)\n- estimated_resolution_time: Time estimate\n\nGuidelines:\n- confidence >= 80: auto_resolve (routine issue with clear solution from history)\n- confidence 50-79: assisted (needs analyst but AI can help)\n- confidence < 50: escalate (complex issue needs expert)",
+              "role": "system"
+            },
+            {
+              "content": "=Current Incident:\nTitle: {{ $('Webhook - Receive Incident').item.json.body.title }}\nDescription: {{ $('Webhook - Receive Incident').item.json.body.description }}\nError Code: {{ $('Webhook - Receive Incident').item.json.body.error_code }}\nComponent: {{ $('Webhook - Receive Incident').item.json.body.component }}\nSeverity: {{ $('Webhook - Receive Incident').item.json.body.severity }}\n\nClassification:\n{{ JSON.stringify($('OpenAI - Classify Incident').item.json.message.content) }}\n\nSimilar Historical Incidents:\n{{ JSON.stringify($('Pinecone Vector Store').all().map(item => item.json.document.metadata), null, 2) }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "id": "ee8e2cbb-e4cc-40dc-9976-24f14a49922b",
+      "name": "OpenAI - Decision Engine",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.3,
+      "position": [
+        -912,
+        368
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "NNLoY0Gdl64ume27",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the first decision - content is already an object (not a string)\nconst decision = $input.first().json.message.content;\nconst incident = $('Webhook - Receive Incident').first().json.body;\nconst jiraKey = $('Jira - Create Issue').first().json.key;\n\nreturn {\n  ...incident,\n  jira_key: jiraKey,\n  confidence_score: decision.confidence_score,\n  recommended_action: decision.recommended_action,\n  reasoning: decision.reasoning,\n  resolution_steps: decision.resolution_steps || [],\n  diagnostic_hints: decision.diagnostic_hints || [],\n  estimated_time: decision.estimated_resolution_time\n};"
+      },
+      "id": "d1f22fb9-7926-4773-b7b3-52992cbd62c9",
+      "name": "Parse Decision",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -656,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "auto",
+              "leftValue": "={{ $json.recommended_action }}",
+              "rightValue": "auto_resolve",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7bca74df-10e5-4977-8f4c-b03efe5545ee",
+      "name": "Route - Auto Resolve?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -448,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "assisted",
+              "leftValue": "={{ $json.recommended_action }}",
+              "rightValue": "assisted",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "26729a84-15c5-4b85-b03d-423c1420aa02",
+      "name": "Route - Assisted?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -112,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "issueKey": "={{ $json.jira_key }}",
+        "updateFields": {
+          "statusId": {
+            "__rl": true,
+            "value": "41",
+            "mode": "id"
+          }
+        }
+      },
+      "id": "8ffca2a7-ba45-4a29-ac61-764a15bec8c4",
+      "name": "Jira - Mark Resolved",
+      "type": "n8n-nodes-base.jira",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        176
+      ],
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "WwpdwS77EuW3YIaI",
+          "name": "Jira SW Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "issueKey": "={{ $json.jira_key }}",
+        "updateFields": {
+          "statusId": {
+            "__rl": true,
+            "value": "2",
+            "mode": "id"
+          }
+        }
+      },
+      "id": "75639f35-5d3d-4efd-bb74-61d9ac0eb600",
+      "name": "Jira - Assign Analyst",
+      "type": "n8n-nodes-base.jira",
+      "typeVersion": 1,
+      "position": [
+        144,
+        416
+      ],
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "WwpdwS77EuW3YIaI",
+          "name": "Jira SW Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "issueKey": "={{ $json.jira_key }}",
+        "updateFields": {
+          "priority": {
+            "id": "1"
+          },
+          "statusId": "10003"
+        }
+      },
+      "id": "140646d7-05ca-45ba-8b9c-e7cd973f872f",
+      "name": "Jira - Escalate",
+      "type": "n8n-nodes-base.jira",
+      "typeVersion": 1,
+      "position": [
+        144,
+        672
+      ],
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "WwpdwS77EuW3YIaI",
+          "name": "Jira SW Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://jaxaiagency.atlassian.net/wiki/api/v2/pages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"spaceId\": \"196610\",\n  \"status\": \"current\", \n  \"title\": \"{{ $json.incident_id }} - {{ $json.error_code }} Resolution\",\n  \"body\": {\n    \"representation\": \"storage\",\n    \"value\": \"<h2>Incident: {{ $json.title }}</h2><p><strong>Error:</strong> {{ $json.error_code }}</p><p><strong>Component:</strong> {{ $json.component }}</p><h2>Resolution</h2><p>{{ $json.reasoning }}</p><p><strong>Confidence:</strong> {{ $json.confidence_score }}%</p><hr/><p><em>Auto-generated by AI Incident Agent</em></p>\"\n  }\n}",
+        "options": {}
+      },
+      "id": "54959d61-a651-4334-abf2-65b89bd6e9d0",
+      "name": "Confluence - Create KB Article",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        256,
+        176
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "uDYDslCZXMix4m8A",
+          "name": "Atlassian"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0AC6TQ1GCQ",
+          "mode": "list",
+          "cachedResultName": "incident-alerts"
+        },
+        "text": "={{ $('Parse Decision').first().json.recommended_action === 'auto_resolve' ? '✅ *Auto-Resolved*' : $('Parse Decision').first().json.recommended_action === 'assisted' ? '🟡 *Assisted*' : '🔴 *Escalated*' }}: {{ $('Parse Decision').first().json.incident_id }}\n\n*Incident:* {{ $('Parse Decision').first().json.title }}\n*Confidence:* {{ $('Parse Decision').first().json.confidence_score }}%\n*Error:* `{{ $('Parse Decision').first().json.error_code }}`\n*Component:* {{ $('Parse Decision').first().json.component }}\n\n<https://jaxaiagency.atlassian.net/browse/{{ $('Parse Decision').first().json.jira_key }}|View Jira Ticket>",
+        "otherOptions": {}
+      },
+      "id": "9c2fdb3d-335c-4ed0-8f57-6dc3fbcbbf8a",
+      "name": "Slack - Send Notification",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.1,
+      "position": [
+        496,
+        384
+      ],
+      "webhookId": "0abfbd9d-c439-41ef-87a8-9d8963eaefcc",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "5CtJr09R4cmLTx40",
+          "name": "Slack account Oauth 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "support@jaxaiagency.com",
+        "toEmail": "=admin@jaxaiagency.com",
+        "subject": "Incident {{ $('Parse Decision').first().json.incident_id }} - {{ $('Parse Decision').first().json.recommended_action === 'auto_resolve' ? 'Resolved' : $('Parse Decision').first().json.recommended_action === 'assisted' ? 'Under Investigation' : 'Escalated' }}",
+        "html": "=<h2>Your incident has been {{ $('Parse Decision').first().json.recommended_action === 'auto_resolve' ? 'resolved' : $('Parse Decision').first().json.recommended_action === 'assisted' ? 'assigned for investigation' : 'escalated to our expert team' }}</h2>\n\n<p><strong>Incident ID:</strong> {{ $('Parse Decision').first().json.incident_id }}</p>\n<p><strong>Title:</strong> {{ $('Parse Decision').first().json.title }}</p>\n<p><strong>Error Code:</strong> {{ $('Parse Decision').first().json.error_code }}</p>\n<p><strong>Component:</strong> {{ $('Parse Decision').first().json.component }}</p>\n<p><strong>Confidence:</strong> {{ $('Parse Decision').first().json.confidence_score }}%</p>\n\n{{ $('Parse Decision').first().json.recommended_action === 'auto_resolve' ? '<h3>Resolution Steps:</h3><ol>' + ($('Parse Decision').first().json.resolution_steps || []).map(s => '<li>' + s + '</li>').join('') + '</ol>' : '' }}\n\n<p><a href=\"https://jaxaiagency.atlassian.net/browse/{{ $('Parse Decision').first().json.jira_key }}\">View Jira Ticket</a></p>\n\n<p>Best regards,<br>JAX AI Agency Support Team</p>",
+        "options": {}
+      },
+      "id": "b7a5aaad-d6b2-472b-bd99-56df98e233f2",
+      "name": "Email - Notify User",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        704,
+        416
+      ],
+      "webhookId": "bf24848a-2d2f-48d9-a406-f7585b4ff182",
+      "credentials": {
+        "smtp": {
+          "id": "zI1LeQjgPwMLJGID",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=={\"success\":true,\"jiraTicket\":\"{{ $('Jira - Create Issue').first().json.key }}\",\"confidenceScore\":{{ $('Parse Decision').first().json.confidence_score }},\"resolutionPath\":\"{{ $('Parse Decision').first().json.recommended_action }}\",\"message\":\"{{ $('Parse Decision').first().json.reasoning }}\"}",
+        "options": {}
+      },
+      "id": "ff6846af-f293-413c-b25f-de86487fd8b8",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        928,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/embeddings",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"text-embedding-3-small\",\n  \"input\": \"{{ $('Webhook - Receive Incident').item.json.body.title }} {{ $('Webhook - Receive Incident').item.json.body.description }} {{ $('Webhook - Receive Incident').item.json.body.error_code }}\",\n  \"dimensions\": 1536\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1360,
+        368
+      ],
+      "id": "d1251320-82f0-46cf-9fb1-3fdb54505216",
+      "name": "HTTP Request",
+      "credentials": {
+        "openAiApi": {
+          "id": "NNLoY0Gdl64ume27",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "load",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "incedent-agent",
+          "mode": "list",
+          "cachedResultName": "incedent-agent"
+        },
+        "prompt": "={{ $('Webhook - Receive Incident').item.json.body.title }} {{ $('Webhook - Receive Incident').item.json.body.description }} {{ $('Webhook - Receive Incident').item.json.body.error_code }}",
+        "topK": 3,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -1184,
+        368
+      ],
+      "id": "02820306-3e81-4509-91cf-cf4728113467",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "AMNFGQK0mOd4aoRy",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1184,
+        576
+      ],
+      "id": "2314cd83-15cc-482f-b13b-2f7d863bf3cf",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "NNLoY0Gdl64ume27",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $('Parse Decision').first().json;\n\nreturn {\n  ...data,\n  confluenceBody: {\n    spaceId: \"196610\",\n    status: \"current\",\n    title: data.incident_id + \" - \" + data.error_code + \" Resolution\",\n    body: {\n      representation: \"storage\",\n      value: `<h2>Incident Details</h2>\n<ul>\n<li><strong>ID:</strong> ${data.incident_id}</li>\n<li><strong>Title:</strong> ${data.title}</li>\n<li><strong>Error:</strong> ${data.error_code}</li>\n<li><strong>Component:</strong> ${data.component}</li>\n<li><strong>Severity:</strong> ${data.severity}</li>\n</ul>\n<h2>Resolution Steps</h2>\n<ol>${(data.resolution_steps || []).map(s => '<li>' + s + '</li>').join('')}</ol>\n<h2>AI Analysis</h2>\n<p><strong>Confidence:</strong> ${data.confidence_score}%</p>\n<p><strong>Reasoning:</strong> ${data.reasoning}</p>\n<p><strong>Estimated Time:</strong> ${data.estimated_time}</p>\n<hr/>\n<p><em>Auto-generated by AI Incident Agent</em></p>`\n    }\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        176
+      ],
+      "id": "fcf9ef41-5679-4d43-9e3d-78130885ea60",
+      "name": "Prepare Confluence"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook - Receive Incident": {
+      "main": [
+        [
+          {
+            "node": "Jira - Create Issue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Jira - Create Issue": {
+      "main": [
+        [
+          {
+            "node": "OpenAI - Classify Incident",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - Classify Incident": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - Decision Engine": {
+      "main": [
+        [
+          {
+            "node": "Parse Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Decision": {
+      "main": [
+        [
+          {
+            "node": "Route - Auto Resolve?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route - Auto Resolve?": {
+      "main": [
+        [
+          {
+            "node": "Jira - Mark Resolved",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Route - Assisted?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route - Assisted?": {
+      "main": [
+        [
+          {
+            "node": "Jira - Assign Analyst",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Jira - Escalate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Jira - Mark Resolved": {
+      "main": [
+        [
+          {
+            "node": "Prepare Confluence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confluence - Create KB Article": {
+      "main": [
+        [
+          {
+            "node": "Slack - Send Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Jira - Assign Analyst": {
+      "main": [
+        [
+          {
+            "node": "Slack - Send Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Jira - Escalate": {
+      "main": [
+        [
+          {
+            "node": "Slack - Send Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack - Send Notification": {
+      "main": [
+        [
+          {
+            "node": "Email - Notify User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email - Notify User": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "main": [
+        [
+          {
+            "node": "OpenAI - Decision Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Confluence": {
+      "main": [
+        [
+          {
+            "node": "Confluence - Create KB Article",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "f1aea764-c57c-4497-bf26-6a210ef88feb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a85c4d71505c096794dd17b97014c0b6c9d1b95f1b8e1b052c8e68b56a4f0260"
+  },
+  "id": "bYsnEjnibC_j3AuFs9XcP",
+  "tags": []
+}

@@ -51,6 +51,7 @@ export function useWorkflowExecution(
   const slaIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const generatedIncidentRef = useRef<Incident | null>(null)
   const n8nResultRef = useRef<N8nResultData | null>(null)
+  const n8nPromiseRef = useRef<Promise<N8nResultData | null> | null>(null)
 
   // SLA timer effect
   useEffect(() => {
@@ -83,6 +84,7 @@ export function useWorkflowExecution(
     executionRef.current.cancelled = true
     generatedIncidentRef.current = null
     n8nResultRef.current = null
+    n8nPromiseRef.current = null
     if (slaIntervalRef.current) {
       clearInterval(slaIntervalRef.current)
     }
@@ -175,8 +177,8 @@ export function useWorkflowExecution(
           // Step 1: Trigger n8n workflow with generated incident
           if (stepId === 'trigger') {
             const incidentToSend = generatedIncidentRef.current || scenario.incident
-            // Fire off n8n workflow without blocking UI progression
-            triggerN8nWorkflow(scenario, incidentToSend)
+            // Store the promise so we can await it before completing
+            n8nPromiseRef.current = triggerN8nWorkflow(scenario, incidentToSend)
               .then(response => {
                 console.log('n8n workflow completed:', response)
                 if (response.success && response.data) {
@@ -195,12 +197,13 @@ export function useWorkflowExecution(
                     resolutionPath: (response.data?.resolutionPath as typeof prev.resolutionPath) || scenario.expectedPath,
                   }))
                   
-                  // Update results with real n8n data (in case UI finished before n8n)
-                  setResults(generateIntegrationResults(scenario, n8nData))
+                  return n8nData
                 }
+                return null
               })
               .catch(error => {
                 console.error('n8n workflow error:', error)
+                return null
               })
           }
           
@@ -215,13 +218,17 @@ export function useWorkflowExecution(
           
           if (executionRef.current.cancelled) break
           
-          setSteps(prev => prev.map((step, idx) => 
-            idx === i ? { 
-              ...step, 
-              status: 'completed' as const,
-              duration: stepDelay,
-            } : step
-          ))
+          // In live mode, don't mark 'complete' step as completed yet - wait for n8n
+          const isLastStep = stepId === 'complete'
+          if (!isLastStep) {
+            setSteps(prev => prev.map((step, idx) => 
+              idx === i ? { 
+                ...step, 
+                status: 'completed' as const,
+                duration: stepDelay,
+              } : step
+            ))
+          }
 
           // Update metrics on decision step
           if (stepId === 'decision') {
@@ -242,21 +249,64 @@ export function useWorkflowExecution(
     }
 
     if (!executionRef.current.cancelled) {
-      const endTime = Date.now()
-      const totalDuration = (endTime - startTime) / 1000
-      
-      // Generate final results - use n8n data in live mode
-      const n8nData = mode === 'live' ? n8nResultRef.current || undefined : undefined
-      const finalResults = generateIntegrationResults(scenario, n8nData)
-      setResults(finalResults)
-      
-      setMetrics(prev => ({
-        ...prev,
-        endTime,
-        totalDuration,
-        costSaved: scenario.costSaved,
-        timeSaved: scenario.timeSaved,
-      }))
+      // In live mode, wait for n8n to complete before showing results
+      if (mode === 'live' && n8nPromiseRef.current) {
+        // Keep showing "running" state while waiting for n8n
+        const n8nData = await n8nPromiseRef.current
+        
+        if (executionRef.current.cancelled) {
+          setIsRunning(false)
+          return
+        }
+        
+        const endTime = Date.now()
+        const totalDuration = (endTime - startTime) / 1000
+        
+        // Now mark the 'complete' step as completed
+        setSteps(prev => prev.map(step => 
+          step.id === 'complete' ? { 
+            ...step, 
+            status: 'completed' as const,
+            duration: totalDuration * 1000,
+          } : step
+        ))
+        
+        // Generate results with real n8n data
+        const finalResults = generateIntegrationResults(scenario, n8nData || undefined)
+        setResults(finalResults)
+        
+        setMetrics(prev => ({
+          ...prev,
+          endTime,
+          totalDuration,
+          costSaved: scenario.costSaved,
+          timeSaved: scenario.timeSaved,
+        }))
+      } else {
+        // Simulation mode - use mock data immediately and mark complete step
+        const endTime = Date.now()
+        const totalDuration = (endTime - startTime) / 1000
+        
+        // Mark 'complete' step as completed
+        setSteps(prev => prev.map(step => 
+          step.id === 'complete' ? { 
+            ...step, 
+            status: 'completed' as const,
+            duration: 500,
+          } : step
+        ))
+        
+        const finalResults = generateIntegrationResults(scenario)
+        setResults(finalResults)
+        
+        setMetrics(prev => ({
+          ...prev,
+          endTime,
+          totalDuration,
+          costSaved: scenario.costSaved,
+          timeSaved: scenario.timeSaved,
+        }))
+      }
     }
 
     setIsRunning(false)
