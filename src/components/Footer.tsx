@@ -17,7 +17,7 @@ const links = [
   {
     icon: Github,
     label: 'GitHub',
-    href: 'https://github.com/vladbichev',
+    href: 'https://github.com/Bichev',
   },
 ]
 

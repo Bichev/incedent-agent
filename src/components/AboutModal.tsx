@@ -6,16 +6,19 @@ import {
   Info, 
   Zap, 
   TrendingUp, 
-  ArrowRight,
   CheckCircle,
   ExternalLink,
   Brain,
-  Search,
   GitBranch,
   Bell,
   Database,
   Workflow,
-  ArrowDown
+  ArrowDown,
+  Headphones,
+  Heart,
+  Building2,
+  Scale,
+  Factory
 } from 'lucide-react'
 
 interface AboutModalProps {
@@ -244,6 +247,61 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
                         {tech}
                       </span>
                     ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Beyond IT: Universal Application */}
+              <div className="space-y-4">
+                <h3 className="text-lg md:text-xl font-semibold text-white">Beyond IT: Universal Application</h3>
+                <p className="text-gray-400 text-sm">
+                  This architecture pattern can be applied to any service domain that requires classification, decision-making, and execution.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Headphones className="w-4 h-4 text-blue-400" />
+                      <span className="text-sm font-medium text-white">Customer Support</span>
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      Auto-resolve common inquiries like password resets and FAQs. Route complex issues to specialized agents.
+                    </p>
+                  </div>
+                  <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Heart className="w-4 h-4 text-red-400" />
+                      <span className="text-sm font-medium text-white">Healthcare</span>
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      Triage patient inquiries by urgency, schedule appointments, escalate critical cases to physicians.
+                    </p>
+                  </div>
+                  <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Building2 className="w-4 h-4 text-green-400" />
+                      <span className="text-sm font-medium text-white">Financial Services</span>
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      Process loan applications, detect fraudulent transactions, route compliance issues.
+                    </p>
+                  </div>
+                  <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Scale className="w-4 h-4 text-purple-400" />
+                      <span className="text-sm font-medium text-white">Legal & Compliance</span>
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      Classify incoming documents, auto-generate standard responses, escalate complex matters.
+                    </p>
+                  </div>
+                  <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Factory className="w-4 h-4 text-orange-400" />
+                      <span className="text-sm font-medium text-white">Manufacturing</span>
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      Predict equipment failures, auto-order replacement parts, escalate critical maintenance.
+                    </p>
                   </div>
                 </div>
               </div>
