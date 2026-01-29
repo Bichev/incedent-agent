@@ -1,24 +1,21 @@
 'use client'
 
-import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   X, 
   Info, 
   Zap, 
   TrendingUp, 
-  Clock, 
-  DollarSign,
-  Shield,
-  Layers,
   ArrowRight,
   CheckCircle,
-  Building2,
-  Headphones,
-  Heart,
-  Scale,
-  Factory,
-  ExternalLink
+  ExternalLink,
+  Brain,
+  Search,
+  GitBranch,
+  Bell,
+  Database,
+  Workflow,
+  ArrowDown
 } from 'lucide-react'
 
 interface AboutModalProps {
@@ -72,161 +69,191 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 md:space-y-8">
-              {/* Hero Section */}
-              <div className="text-center space-y-3">
-                <h3 className="text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                  Transform Your IT Operations with AI
-                </h3>
-                <p className="text-gray-300 text-sm md:text-base lg:text-lg max-w-2xl mx-auto">
-                  Stop drowning in tickets. Let AI handle routine incidents automatically while your team focuses on what matters.
+              {/* Overview */}
+              <div className="space-y-3">
+                <h3 className="text-lg md:text-xl font-semibold text-white">Overview</h3>
+                <p className="text-gray-300 text-sm md:text-base leading-relaxed">
+                  AI Incident Agent is an autonomous IT service management system that uses AI to classify, 
+                  analyze, and resolve incidents without human intervention. It replaces repetitive 
+                  decision-making with intelligent automation using confidence-based routing.
                 </p>
               </div>
 
-              {/* The Problem */}
-              <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 md:p-5">
-                <h4 className="text-base md:text-lg font-semibold text-red-400 mb-2 md:mb-3">The Problem</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3 text-xs md:text-sm">
-                  <div className="flex items-start gap-2">
-                    <span className="text-red-400 mt-0.5">•</span>
-                    <span className="text-gray-300"><strong className="text-white">70% of L1 tickets</strong> are repetitive with known solutions</span>
+              {/* Architecture Flow */}
+              <div className="space-y-4">
+                <h3 className="text-lg md:text-xl font-semibold text-white">Architecture</h3>
+                
+                {/* Flow Steps */}
+                <div className="space-y-3">
+                  {/* Step 1: Ingestion */}
+                  <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                        <Workflow className="w-4 h-4 text-blue-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-white text-sm md:text-base">1. Incident Ingestion</h4>
+                        <p className="text-xs md:text-sm text-gray-400 mt-1">
+                          Receives incidents via Email, API, Chat, or Webhook triggers
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-red-400 mt-0.5">•</span>
-                    <span className="text-gray-300"><strong className="text-white">2-4 hours</strong> average resolution for routine issues</span>
+
+                  <div className="flex justify-center">
+                    <ArrowDown className="w-4 h-4 text-slate-600" />
                   </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-red-400 mt-0.5">•</span>
-                    <span className="text-gray-300"><strong className="text-white">$25-75 per ticket</strong> in labor costs, even for simple fixes</span>
+
+                  {/* Step 2: Classification */}
+                  <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                        <Brain className="w-4 h-4 text-purple-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-white text-sm md:text-base">2. AI Classification Engine</h4>
+                        <p className="text-xs md:text-sm text-gray-400 mt-1">
+                          GPT-4o analyzes incident details, extracts category, urgency, complexity, and probable cause. 
+                          Generates semantic embeddings for similarity search.
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-red-400 mt-0.5">•</span>
-                    <span className="text-gray-300"><strong className="text-white">SLA breaches</strong> cost millions in penalties annually</span>
+
+                  <div className="flex justify-center">
+                    <ArrowDown className="w-4 h-4 text-slate-600" />
+                  </div>
+
+                  {/* Step 3: Vector Search */}
+                  <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center flex-shrink-0">
+                        <Database className="w-4 h-4 text-cyan-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-white text-sm md:text-base">3. Vector Similarity Search</h4>
+                        <p className="text-xs md:text-sm text-gray-400 mt-1">
+                          Pinecone searches historical incident database, returns top similar incidents 
+                          with their resolutions to provide context for decision-making.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-center">
+                    <ArrowDown className="w-4 h-4 text-slate-600" />
+                  </div>
+
+                  {/* Step 4: Decision Engine */}
+                  <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center flex-shrink-0">
+                        <GitBranch className="w-4 h-4 text-orange-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-white text-sm md:text-base">4. AI Decision Engine</h4>
+                        <p className="text-xs md:text-sm text-gray-400 mt-1">
+                          Evaluates incident + classification + similar cases. Calculates confidence score (0-100%) 
+                          and determines resolution path based on thresholds.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-center">
+                    <ArrowDown className="w-4 h-4 text-slate-600" />
+                  </div>
+
+                  {/* Resolution Paths */}
+                  <div className="grid grid-cols-3 gap-2 md:gap-3">
+                    <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-3 md:p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CheckCircle className="w-4 h-4 text-green-400" />
+                        <span className="text-xs md:text-sm font-medium text-green-400">Auto-Resolve</span>
+                      </div>
+                      <p className="text-[10px] md:text-xs text-gray-400">
+                        Confidence ≥80%: Execute resolution, update ticket, create KB article
+                      </p>
+                    </div>
+                    <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-3 md:p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <TrendingUp className="w-4 h-4 text-yellow-400" />
+                        <span className="text-xs md:text-sm font-medium text-yellow-400">Assisted</span>
+                      </div>
+                      <p className="text-[10px] md:text-xs text-gray-400">
+                        50-79%: Assign to analyst with diagnostic hints and context
+                      </p>
+                    </div>
+                    <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 md:p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Bell className="w-4 h-4 text-red-400" />
+                        <span className="text-xs md:text-sm font-medium text-red-400">Escalate</span>
+                      </div>
+                      <p className="text-[10px] md:text-xs text-gray-400">
+                        &lt;50%: Priority escalation to expert team with full context
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* The Solution */}
-              <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 md:p-5">
-                <h4 className="text-base md:text-lg font-semibold text-green-400 mb-3">The Solution: Autonomous AI Agents</h4>
-                <div className="grid grid-cols-3 gap-2 md:gap-4">
-                  <div className="space-y-1.5 md:space-y-2 text-center md:text-left">
-                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-green-500/20 flex items-center justify-center mx-auto md:mx-0">
-                      <Zap className="w-4 h-4 md:w-5 md:h-5 text-green-400" />
-                    </div>
-                    <h5 className="font-medium text-white text-xs md:text-sm">Instant Classification</h5>
-                    <p className="text-[10px] md:text-sm text-gray-400 hidden md:block">AI analyzes incidents in milliseconds using GPT-4</p>
+              {/* Technology Stack */}
+              <div className="space-y-4">
+                <h3 className="text-lg md:text-xl font-semibold text-white">Technology Stack</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="bg-slate-800/30 rounded-xl p-4">
+                    <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Core AI/ML</h4>
+                    <ul className="space-y-2 text-sm">
+                      <li className="flex items-center gap-2 text-gray-300">
+                        <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+                        <span><strong className="text-white">OpenAI GPT-4o-mini</strong> — Classification & decisions</span>
+                      </li>
+                      <li className="flex items-center gap-2 text-gray-300">
+                        <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+                        <span><strong className="text-white">text-embedding-3-small</strong> — Semantic embeddings</span>
+                      </li>
+                      <li className="flex items-center gap-2 text-gray-300">
+                        <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+                        <span><strong className="text-white">Pinecone</strong> — Vector database</span>
+                      </li>
+                    </ul>
                   </div>
-                  <div className="space-y-1.5 md:space-y-2 text-center md:text-left">
-                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-green-500/20 flex items-center justify-center mx-auto md:mx-0">
-                      <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-green-400" />
-                    </div>
-                    <h5 className="font-medium text-white text-xs md:text-sm">Auto-Resolution</h5>
-                    <p className="text-[10px] md:text-sm text-gray-400 hidden md:block">High-confidence incidents resolved automatically</p>
+                  <div className="bg-slate-800/30 rounded-xl p-4">
+                    <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Orchestration & Integrations</h4>
+                    <ul className="space-y-2 text-sm">
+                      <li className="flex items-center gap-2 text-gray-300">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                        <span><strong className="text-white">n8n</strong> — Workflow automation</span>
+                      </li>
+                      <li className="flex items-center gap-2 text-gray-300">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                        <span><strong className="text-white">Jira & Confluence</strong> — Ticket & KB management</span>
+                      </li>
+                      <li className="flex items-center gap-2 text-gray-300">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                        <span><strong className="text-white">Slack & Email</strong> — Notifications</span>
+                      </li>
+                    </ul>
                   </div>
-                  <div className="space-y-1.5 md:space-y-2 text-center md:text-left">
-                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-green-500/20 flex items-center justify-center mx-auto md:mx-0">
-                      <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-green-400" />
-                    </div>
-                    <h5 className="font-medium text-white text-xs md:text-sm">Smart Escalation</h5>
-                    <p className="text-[10px] md:text-sm text-gray-400 hidden md:block">Complex issues escalated with full context</p>
+                </div>
+                <div className="bg-slate-800/30 rounded-xl p-4">
+                  <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Frontend & Infrastructure</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {['Next.js 14', 'TypeScript', 'Tailwind CSS', 'Framer Motion', 'Vercel'].map(tech => (
+                      <span key={tech} className="px-3 py-1 bg-slate-700/50 rounded-full text-xs text-gray-300">
+                        {tech}
+                      </span>
+                    ))}
                   </div>
                 </div>
               </div>
 
-              {/* Impact Metrics */}
-              <div>
-                <h4 className="text-base md:text-lg font-semibold text-white mb-3 md:mb-4">Business Impact</h4>
-                <div className="grid grid-cols-4 gap-2 md:gap-4">
-                  <div className="bg-slate-800/50 rounded-xl p-2 md:p-4 text-center">
-                    <Clock className="w-4 h-4 md:w-6 md:h-6 text-blue-400 mx-auto mb-1 md:mb-2" />
-                    <div className="text-lg md:text-2xl font-bold text-white">85%</div>
-                    <div className="text-[9px] md:text-xs text-gray-400">Faster</div>
-                  </div>
-                  <div className="bg-slate-800/50 rounded-xl p-2 md:p-4 text-center">
-                    <DollarSign className="w-4 h-4 md:w-6 md:h-6 text-green-400 mx-auto mb-1 md:mb-2" />
-                    <div className="text-lg md:text-2xl font-bold text-white">$60+</div>
-                    <div className="text-[9px] md:text-xs text-gray-400">Saved</div>
-                  </div>
-                  <div className="bg-slate-800/50 rounded-xl p-2 md:p-4 text-center">
-                    <Shield className="w-4 h-4 md:w-6 md:h-6 text-purple-400 mx-auto mb-1 md:mb-2" />
-                    <div className="text-lg md:text-2xl font-bold text-white">99%</div>
-                    <div className="text-[9px] md:text-xs text-gray-400">SLA</div>
-                  </div>
-                  <div className="bg-slate-800/50 rounded-xl p-2 md:p-4 text-center">
-                    <Layers className="w-4 h-4 md:w-6 md:h-6 text-orange-400 mx-auto mb-1 md:mb-2" />
-                    <div className="text-lg md:text-2xl font-bold text-white">70%</div>
-                    <div className="text-[9px] md:text-xs text-gray-400">Deflection</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Beyond IT */}
-              <div>
-                <h4 className="text-base md:text-lg font-semibold text-white mb-2 md:mb-3">Beyond IT: Universal Application</h4>
-                <div className="grid grid-cols-5 gap-1.5 md:gap-3">
-                  <div className="bg-slate-800/50 rounded-lg p-2 md:p-3 text-center">
-                    <Headphones className="w-4 h-4 md:w-5 md:h-5 text-blue-400 mx-auto mb-0.5 md:mb-1" />
-                    <div className="text-[9px] md:text-xs text-gray-300">Support</div>
-                  </div>
-                  <div className="bg-slate-800/50 rounded-lg p-2 md:p-3 text-center">
-                    <Heart className="w-4 h-4 md:w-5 md:h-5 text-red-400 mx-auto mb-0.5 md:mb-1" />
-                    <div className="text-[9px] md:text-xs text-gray-300">Healthcare</div>
-                  </div>
-                  <div className="bg-slate-800/50 rounded-lg p-2 md:p-3 text-center">
-                    <Building2 className="w-4 h-4 md:w-5 md:h-5 text-green-400 mx-auto mb-0.5 md:mb-1" />
-                    <div className="text-[9px] md:text-xs text-gray-300">Finance</div>
-                  </div>
-                  <div className="bg-slate-800/50 rounded-lg p-2 md:p-3 text-center">
-                    <Scale className="w-4 h-4 md:w-5 md:h-5 text-purple-400 mx-auto mb-0.5 md:mb-1" />
-                    <div className="text-[9px] md:text-xs text-gray-300">Legal</div>
-                  </div>
-                  <div className="bg-slate-800/50 rounded-lg p-2 md:p-3 text-center">
-                    <Factory className="w-4 h-4 md:w-5 md:h-5 text-orange-400 mx-auto mb-0.5 md:mb-1" />
-                    <div className="text-[9px] md:text-xs text-gray-300">Industry</div>
-                  </div>
-                </div>
-                <p className="text-gray-500 text-[10px] md:text-xs mt-2 md:mt-3 text-center italic">
-                  Universal pattern: Classify → Decide → Execute → Learn
+              {/* Key Principle */}
+              <div className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 border border-slate-700/50 rounded-xl p-4">
+                <p className="text-center text-sm md:text-base text-gray-300">
+                  <span className="font-medium text-white">Universal Pattern:</span>{' '}
+                  <span className="text-blue-400">Classify</span> → <span className="text-purple-400">Decide</span> → <span className="text-pink-400">Execute</span> → <span className="text-green-400">Learn</span>
                 </p>
-              </div>
-
-              {/* How It Works */}
-              <div>
-                <h4 className="text-base md:text-lg font-semibold text-white mb-3 md:mb-4">How It Works</h4>
-                <div className="grid grid-cols-5 gap-1 md:gap-2 text-xs md:text-sm">
-                  <div className="flex flex-col items-center text-center gap-1 bg-slate-800/50 rounded-lg p-2 md:px-3 md:py-2">
-                    <span className="text-blue-400 font-bold">1</span>
-                    <span className="text-gray-300 text-[10px] md:text-xs">Incident</span>
-                  </div>
-                  <div className="flex flex-col items-center text-center gap-1 bg-slate-800/50 rounded-lg p-2 md:px-3 md:py-2">
-                    <span className="text-blue-400 font-bold">2</span>
-                    <span className="text-gray-300 text-[10px] md:text-xs">Classify</span>
-                  </div>
-                  <div className="flex flex-col items-center text-center gap-1 bg-slate-800/50 rounded-lg p-2 md:px-3 md:py-2">
-                    <span className="text-blue-400 font-bold">3</span>
-                    <span className="text-gray-300 text-[10px] md:text-xs">Search</span>
-                  </div>
-                  <div className="flex flex-col items-center text-center gap-1 bg-slate-800/50 rounded-lg p-2 md:px-3 md:py-2">
-                    <span className="text-blue-400 font-bold">4</span>
-                    <span className="text-gray-300 text-[10px] md:text-xs">Decide</span>
-                  </div>
-                  <div className="flex flex-col items-center text-center gap-1 bg-slate-800/50 rounded-lg p-2 md:px-3 md:py-2">
-                    <span className="text-blue-400 font-bold">5</span>
-                    <span className="text-gray-300 text-[10px] md:text-xs">Execute</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Tech Stack */}
-              <div className="bg-slate-800/30 rounded-xl p-3 md:p-5">
-                <h4 className="text-xs md:text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2 md:mb-3">Powered By</h4>
-                <div className="flex flex-wrap gap-1.5 md:gap-2">
-                  {['OpenAI', 'Pinecone', 'n8n', 'Next.js', 'Jira', 'Confluence', 'Slack', 'Vercel'].map(tech => (
-                    <span key={tech} className="px-2 py-0.5 md:px-3 md:py-1 bg-slate-700/50 rounded-full text-[10px] md:text-xs text-gray-300">
-                      {tech}
-                    </span>
-                  ))}
-                </div>
               </div>
             </div>
 
