@@ -48,19 +48,19 @@ export function ResultsPanel({ results, scenario, isComplete }: ResultsPanelProp
       <h2 className="text-xl font-semibold text-white mb-4">Integration Results</h2>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-4 p-1 bg-slate-800/50 rounded-lg">
+      <div className="flex gap-1 mb-4 p-1 bg-slate-800/50 rounded-lg overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-all ${
+            className={`flex items-center justify-center gap-1 py-2 px-2 sm:px-3 rounded-md text-xs sm:text-sm font-medium transition-all whitespace-nowrap min-w-0 flex-1 ${
               activeTab === tab.id
                 ? 'bg-slate-700 text-white'
                 : 'text-gray-400 hover:text-gray-300'
             }`}
           >
             {tab.icon}
-            <span className="hidden sm:inline">{tab.label}</span>
+            <span className="hidden lg:inline">{tab.label}</span>
           </button>
         ))}
       </div>
